@@ -92,7 +92,7 @@ void mpeg_init_all (int w, int h, int pix) {
 	
 }
 
-AVFrame * encode_frame_to_mpeg(AVFrame * pRawFrame) {
+uint8_t * encode_frame_to_mpeg(AVFrame * pRawFrame) {
 	
 	swsR_YUV = sws_scale( swsC_YUV,									//	SwsContext - Setup for scaling
 						(const uint8_t* const*)	pRawFrame->data,	//	Source frame data (cast to required type)
@@ -112,6 +112,7 @@ AVFrame * encode_frame_to_mpeg(AVFrame * pRawFrame) {
 		sprintf(stderr, "something went wrong with the mpeg encoder : %s\n", AVERROR_LOOKUP(iEncodedBytes));
 		exit(EXIT_FAILURE);
 	}
-	return (pMPEGFrame);
+	
+	return (pOutBufferVidMPEG);
 }
 
