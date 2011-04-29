@@ -24,14 +24,14 @@ void allocate_variables() {
 	// Allocate contexts
 	pCodecCtxVidEnc = avcodec_alloc_context();
 	if ( (pCodecCtxVidEnc == NULL) ) {
-		sprintf(stderr, "cannot allocate context in mpeg\n");
+		fprintf(stderr, "cannot allocate context in mpeg\n");
 		exit(EXIT_FAILURE);
 	}
 	// Allocate frames
 	pRawFrame = avcodec_alloc_frame();
 	pMPEGFrame = avcodec_alloc_frame();
 	if ( (pRawFrame == NULL) || (pMPEGFrame == NULL) ) {
-		sprintf(stderr, "cannot allocate frame for mpeg\n");
+		fprintf(stderr, "cannot allocate frame for mpeg\n");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -40,7 +40,7 @@ void init_mpeg_codec (int width, int height, int pixel_format) {
 
     pCodecVidEncMPEG = avcodec_find_encoder(CODEC_ID_MPEG2VIDEO);
     if (pCodecVidEncMPEG == NULL) {
-        sprintf(stderr, "cannot find mpeg encoder\n");
+        fprintf(stderr, "cannot find mpeg encoder\n");
         exit(EXIT_FAILURE);
 	}
 	avcodec_get_context_defaults(pCodecCtxVidEncMPEG);
@@ -57,7 +57,7 @@ void init_mpeg_codec (int width, int height, int pixel_format) {
     
     // all we want to do is convert from pixel_format supplied as an argument to PIX_FMT_YUV420P for the encoder.
     // DEBUG //
-    sprintf(stderr, "Just so you know, we're setting the converter to go between %s -> %s\n", PIX_FMT_LOOKUP(pixel_format), PIX_FMT_LOOKUP(pCodecCtxVidEncMPEG->pix_fmt));
+    fprintf(stderr, "Just so you know, we're setting the converter to go between %s -> %s\n", PIX_FMT_LOOKUP(pixel_format), PIX_FMT_LOOKUP(pCodecCtxVidEncMPEG->pix_fmt));
 	swsC_YUV = sws_getContext(	width,							//	Source width
 								height,							//	Source height
 								pixel_format,					//	Source format
@@ -68,14 +68,14 @@ void init_mpeg_codec (int width, int height, int pixel_format) {
 								NULL, NULL, NULL);				//	Filters & Pointer Setup (NULL chooses defaults for last 3 options)
     
     if (swsC_YUV == NULL) {
-		sprintf(stderr, "failed to setup software scaler\n");
+		fprintf(stderr, "failed to setup software scaler\n");
 		exit(EXIT_FAILURE);
 	}
 	
     // Open the mpeg encoder
     temp = avcodec_open(pCodecCtxVidEncMPEG, pCodecVidEncMPEG);
 	if(temp < 0) {
-		sprintf(stderr, "cannot open mpeg encoder : %s\n", AVERROR_LOOKUP(temp));
+		fprintf(stderr, "cannot open mpeg encoder : %s\n", AVERROR_LOOKUP(temp));
 		exit(EXIT_FAILURE);
 	}
 }
@@ -85,13 +85,13 @@ void allocate_memory () {
     iOutBufferSizeMPEG = 100000;
 	pYUVBufferVidMPEG = (uint8_t *) malloc((iYUVFrameSize));
     if ( (pYUVBufferVidMPEG == NULL) ) {
-		sprintf(stderr, "cannot allocate mpeg encoder frame buffer memory");
+		fprintf(stderr, "cannot allocate mpeg encoder frame buffer memory");
 		exit(EXIT_FAILURE);
 	}
 	
 	pOutBufferVidMPEG = (uint8_t *) av_malloc(iOutBufferSize * sizeof(uint8_t));  // alloc output buffer for encoded datastream
     if ( (pOutBufferVidMPEG == NULL) ) {
-		sprintf(stderr, "cannot allocate mpeg encoder output buffer memory");
+		fprintf(stderr, "cannot allocate mpeg encoder output buffer memory");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -115,13 +115,13 @@ uint8_t * encode_frame_to_mpeg(AVFrame * pRawFrame) {
 						pMPEGFrame->linesize);						//	Dest frame stride
 
 	if (swsR_YUV <= 0) {
-		sprintf(stderr, "something went wrong with the software scaler\n");
+		fprintf(stderr, "something went wrong with the software scaler\n");
 		exit(EXIT_FAILURE);
 	}
 	
 	iEncodedBytes = avcodec_encode_video(pCodecCtxVidEncMPEG, pOutBufferVidMPEG, iOutBufferSize, pFrameEncMPEG);
 	if (iEncodedBytes < 0) {
-		sprintf(stderr, "something went wrong with the mpeg encoder : %s\n", AVERROR_LOOKUP(iEncodedBytes));
+		fprintf(stderr, "something went wrong with the mpeg encoder : %s\n", AVERROR_LOOKUP(iEncodedBytes));
 		exit(EXIT_FAILURE);
 	}
 	
