@@ -4,6 +4,6 @@
 
 int main(int argc, char *argv[])
 {
-    system("./exec/Client | ./exec/player -");
+    system("./exec/client | ./exec/player -");
     //system("./Client | ./player -");
 }
