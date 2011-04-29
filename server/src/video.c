@@ -1,5 +1,47 @@
-#include "video.h"
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h> 
+#include <libswscale/swscale.h>
+#include "util.h"
 
+static void setup_ffmpeg(){
+	av_register_all();
+    avdevice_register_all();
+}
+
+AVFormatContext		*pWebcamFormatContext;
+AVCodecContext		*pWebcamCodecContext;
+AVCodec				*pWebcamCodec;
+AVFrame				*pFrameDec;		// YUYV422
+static AVPacket		pWebcamPacket;
+int					iVideoStream=-1;
+
+AVFrame * get_webcam_frame()
+{
+	
+	int				iFrameFinished=0;
+	int 			temp;
+
+	pFrameDec = avcodec_alloc_frame();
+	if ( (pFrameDec == NULL) ) {
+		printf("couldn't allocate either pFrame of pFrameDec\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	do {
+		temp = av_read_frame(pWebcamFormatContext, &pWebcamPacket);
+		if (temp < 0) {printf("av_read_frame(webcam) failed. Exiting..."); exit(EXIT_FAILURE);} // error or EOF
+		if(pWebcamPacket.stream_index==iVideoStream) {
+			temp = avcodec_decode_video2(pWebcamCodecContext, pFrameDec, &iFrameFinished, &pWebcamPacket);
+			if (temp < 0) {printf("avcodec_decode_video2(webcam) failed. Exiting..."); exit(EXIT_FAILURE);} // error
+		}
+	av_free_packet(&pWebcamPacket);
+	} while (!iFrameFinished);	
+	
+	//printf("\n\rPICTURE DATA 1:       %lu\n", pFrameDec->data[0]); fflush(stdout);
+	
+	return (pFrameDec);
+}
 
 static void write_video_frame(AVFormatContext *oc, AVStream *st)
 {
@@ -96,9 +138,9 @@ static void write_video_frame(AVFormatContext *oc, AVStream *st)
 
 	    	int ret = av_write_frame(oc, &out);
 		
-		cout << "Sending: " << out.size << endl;
+		fprintf(stderr, "Sending: %d\n", out.size);
 	        //addFrame((char *)out.data, pkt.size); //OBADA ADD
-		addFrameByFile(filename,"frame");
+		//addFrameByFile(filename,"frame");
 	    }
         }
     }
@@ -180,32 +222,7 @@ static void open_webcam()
 	//PIX_FMT_LOOKUP(pWebcamCodecContext->pix_fmt);
 }
 
-AVFrame * get_webcam_frame()
-{
-	
-	int				iFrameFinished=0;
-	int 			temp;
 
-	pFrameDec = avcodec_alloc_frame();
-	if ( (pFrameDec == NULL) ) {
-		printf("couldn't allocate either pFrame of pFrameDec\n");
-		exit(EXIT_FAILURE);
-	}
-	
-	do {
-		temp = av_read_frame(pWebcamFormatContext, &pWebcamPacket);
-		if (temp < 0) {printf("av_read_frame(webcam) failed. Exiting..."); exit(EXIT_FAILURE);} // error or EOF
-		if(pWebcamPacket.stream_index==iVideoStream) {
-			temp = avcodec_decode_video2(pWebcamCodecContext, pFrameDec, &iFrameFinished, &pWebcamPacket);
-			if (temp < 0) {printf("avcodec_decode_video2(webcam) failed. Exiting..."); exit(EXIT_FAILURE);} // error
-		}
-	av_free_packet(&pWebcamPacket);
-	} while (!iFrameFinished);	
-	
-	//printf("\n\rPICTURE DATA 1:       %lu\n", pFrameDec->data[0]); fflush(stdout);
-	
-	return (pFrameDec);
-}
 
 // GEORGE method
 static void close_webcam()

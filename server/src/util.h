@@ -22,6 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef UNV_UTIL
+#define UNV_UTIL 1
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,13 +34,14 @@
 #define UINT64_C(c) (c ## ULL)
 #endif
 
-extern "C" {	// required for compiling in C++ - Thanks Obada! :D
+//extern "C" {	// required for compiling in C++ - Thanks Obada! :D
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 
 #include <libswscale/swscale.h>
-#include "video.h"
-}
+//#include "video.h"
+//#include "audio.h"
+//}
 //#include "pix_fmt_lookup.h"
 
 #undef exit
@@ -54,67 +57,33 @@ extern "C" {	// required for compiling in C++ - Thanks Obada! :D
 
 static int sws_flags = SWS_BICUBIC;
 
-AVFrame * get_webcam_frame ();
+
 
 /**************************************************************/
 /* audio output */
 
-float t, tincr, tincr2;
-int16_t *samples;
-uint8_t *audio_outbuf;
-int audio_outbuf_size;
-int audio_input_frame_size;
+extern float t, tincr, tincr2;
+extern int16_t *samples;
+extern uint8_t *audio_outbuf;
+extern int audio_outbuf_size;
+extern int audio_input_frame_size;
 
 /* video output */
 
-AVFrame *picture, *tmp_picture;
-uint8_t *video_outbuf;
-int frame_count, video_outbuf_size;
+extern AVFrame *picture, *tmp_picture;
+extern uint8_t *video_outbuf;
+extern int frame_count, video_outbuf_size;
 
+extern const char *filename;
 
-
-/* prepare a 16 bit dummy audio frame of 'frame_size' samples and
-   'nb_channels' channels */
 
 
 
 /**************************************************************/
 
-static AVFrame *alloc_picture(enum PixelFormat pix_fmt, int width, int height)
-{
-    AVFrame *picture;
-    uint8_t *picture_buf;
-    int size;
+static AVFrame *alloc_picture(enum PixelFormat , int, int);
 
-    picture = avcodec_alloc_frame();
-    if (!picture)
-        return NULL;
-    size = avpicture_get_size(pix_fmt, width, height);
-    picture_buf = (uint8_t*)av_malloc(size);
-    if (!picture_buf) {
-        av_free(picture);
-        return NULL;
-    }
-    avpicture_fill((AVPicture *)picture, picture_buf,
-                   pix_fmt, width, height);
-    return picture;
-}
+char * AVERROR_LOOKUP(int );
+char * PIX_FMT_LOOKUP(int );
 
-
-
-
-///////////////////////////////////////////////////////////////////////////
-AVFormatContext		*pWebcamFormatContext;
-AVCodecContext		*pWebcamCodecContext;
-AVCodec				*pWebcamCodec;
-AVFrame				*pFrameDec;		// YUYV422
-static AVPacket		pWebcamPacket;
-int					iVideoStream=-1;
-
-// GEORGE method
-
-
-//overloading the avio_write method
-void avio_write() {
-	
-}
+#endif
