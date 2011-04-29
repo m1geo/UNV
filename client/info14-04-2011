@@ -1,0 +1,9 @@
+14/04/2011 1:17 am
+
+There are significant changes from the version of the Client to this one. The changes are been descrinbed to the corresponding e-mail
+
+in order to compile please run the command: make in the folder you see the Makefile
+
+In order to run the Client please run the ./runClient executable appears after the compilation.
+
+Stelios
