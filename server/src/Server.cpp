@@ -43,7 +43,9 @@ const char *filename = "test.mkv";
 
 //Include the Networking libraries and functions - Include last
 #include "rtspServer.h"
-#include "gcs.h"
+#include "util.h"
+#include "video.h"
+#include "audio.h"
 
 // Networking stuffs :)
 //#include "gs_network.c"

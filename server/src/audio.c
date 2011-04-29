@@ -1,3 +1,9 @@
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h> 
+#include <libswscale/swscale.h>
+#include "util.h"
+
 
 /*
  * add an audio output stream

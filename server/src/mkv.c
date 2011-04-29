@@ -10,25 +10,6 @@
 
 	printf("This program attempts to make %f seconds of video/audio from webcam\n", STREAM_DURATION);
 
-    /* initialize libavcodec, and register all codecs, formats and devices */
-    av_register_all();
-    avdevice_register_all();	// GEORGE
-
-    //if (argc != 2) {
-//	if (argc != 1) {
-//        printf("usage: %s output_file\n"
-//               "API example program to output a media file with libavformat.\n"
-//               "The output format is automatically guessed according to the file extension.\n"
-//               "Raw images can also be output by using '%%d' in the filename\n"
-//               "\n", argv[0]);
-//        exit(1);
-//    }
-
-    if(cliOpts.networkport > 0) {	// if the port is greater than 0, we requested it.
-		//Usage: (Queue size when reset, time between frames in miliseconds, TCP Port, UDP Port)
-		startServerRTSP(20, 30015, 3015);
-    }
-
     /* auto detect the output format from the name. default is
        mpeg. */
     fmt = av_guess_format(NULL, filename, NULL);
@@ -91,7 +72,7 @@
 
     /* write the stream header, if any */
     av_write_header(oc);
-    addFrameByFile(filename,"header");
+    //addFrameByFile(filename,"header");
     //addHeader(pHead) //OABDA - How? what is oc?
     
     usleep(30000000);
@@ -137,12 +118,20 @@
     close_webcam();
 
     /* free the streams */
-    for(i = 0; i < (int)oc->nb_streams; i++) {
+   
+
+
+
+
+} 
+
+
+static cleanup_mkv() {
+	for(i = 0; i < (int)oc->nb_streams; i++) {
         av_freep(&oc->streams[i]->codec);
         av_freep(&oc->streams[i]);
     }
-
-    if (!(fmt->flags & AVFMT_NOFILE)) {
+   if (!(fmt->flags & AVFMT_NOFILE)) {
         /* close the output file */
         url_fclose(oc->pb);
     }
@@ -152,6 +141,8 @@
 
     //return 0;
     dontDie();
+    
+}
 
 ////////////////////////////////////////// GEORGES MKV PART END ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
