@@ -8,7 +8,7 @@
 /*
  * add an audio output stream
  */
-static AVStream *add_audio_stream(AVFormatContext *oc, enum CodecID codec_id)
+AVStream *add_audio_stream(AVFormatContext *oc, enum CodecID codec_id)
 {
     AVCodecContext *c;
     AVStream *st;
@@ -35,8 +35,7 @@ static AVStream *add_audio_stream(AVFormatContext *oc, enum CodecID codec_id)
 
     return st;
 }
-
-static void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
+void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
 {
     int j, i, v;
     int16_t *q;
@@ -51,8 +50,7 @@ static void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
     }
 }
 
-
-static void open_audio(AVFormatContext *oc, AVStream *st)
+ void open_audio(AVFormatContext *oc, AVStream *st)
 {
     AVCodecContext *c;
     AVCodec *codec;
@@ -104,7 +102,7 @@ static void open_audio(AVFormatContext *oc, AVStream *st)
 
 
 
-static void write_audio_frame(AVFormatContext *oc, AVStream *st)
+void write_audio_frame(AVFormatContext *oc, AVStream *st)
 {
     AVCodecContext *c;
     AVPacket pkt;
@@ -115,7 +113,8 @@ static void write_audio_frame(AVFormatContext *oc, AVStream *st)
     get_audio_frame(samples, audio_input_frame_size, c->channels);
 
     pkt.size= avcodec_encode_audio(c, audio_outbuf, audio_outbuf_size, samples);
-
+   // iPktSize=0;
+	iPktSize= pkt.size;
     if (c->coded_frame && c->coded_frame->pts != (int)AV_NOPTS_VALUE)
         pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, st->time_base);
     pkt.flags |= AV_PKT_FLAG_KEY;
@@ -129,8 +128,8 @@ static void write_audio_frame(AVFormatContext *oc, AVStream *st)
     }
             int ret = av_interleaved_write_frame(oc, &pkt);
 
-	    if(ret == 1)
-		addFrameByFile(filename,"frame");
+	 //   if(ret == 1)
+	//	addFrameByFile(filename,"frame");
 	    /*AVPacket out;
 	    av_init_packet(&out);
 	    //int av_interleave_packet_per_dts( AVFormatContext * s, AVPacket * out, AVPacket * pkt, int flush)
@@ -146,7 +145,7 @@ static void write_audio_frame(AVFormatContext *oc, AVStream *st)
 	    }*/
 }
 
-static void close_audio(AVFormatContext *oc, AVStream *st)
+void close_audio(AVFormatContext *oc, AVStream *st)
 {
     avcodec_close(st->codec);
 

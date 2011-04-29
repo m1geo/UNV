@@ -25,14 +25,16 @@ uint8_t 					*pYUVBufferVid;
 static struct SwsContext	*swsC_YUV;
 int 						swsR_YUV;
 
+int iPktSize;
 
 
-const char *filename;
+
+const char *filename= "test.mkv";
 
 
 /**************************************************************/
 
-static AVFrame *alloc_picture(enum PixelFormat pix_fmt, int width, int height)
+AVFrame *alloc_picture(enum PixelFormat pix_fmt, int width, int height)
 {
     AVFrame *picture;
     uint8_t *picture_buf;

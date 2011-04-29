@@ -3,18 +3,26 @@
 #include <libavdevice/avdevice.h> 
 #include <libswscale/swscale.h>
 #include "util.h"
+#include "rtspServer.h"
 
-static void setup_ffmpeg(){
-	av_register_all();
-    avdevice_register_all();
-}
 
 AVFormatContext		*pWebcamFormatContext;
 AVCodecContext		*pWebcamCodecContext;
 AVCodec				*pWebcamCodec;
 AVFrame				*pFrameDec;		// YUYV422
-static AVPacket		pWebcamPacket;
+AVPacket		pWebcamPacket;
 int					iVideoStream=-1;
+
+
+
+void setup_ffmpeg(){
+	av_register_all();
+    avdevice_register_all();
+}
+
+
+
+
 
 AVFrame * get_webcam_frame()
 {
@@ -43,7 +51,7 @@ AVFrame * get_webcam_frame()
 	return (pFrameDec);
 }
 
-static void write_video_frame(AVFormatContext *oc, AVStream *st)
+void write_video_frame(AVFormatContext *oc, AVStream *st)
 {
     int out_size, ret;
     AVCodecContext *c;
@@ -79,81 +87,30 @@ static void write_video_frame(AVFormatContext *oc, AVStream *st)
             //printf("PICTURE DATA 2:       %lu\n", picture->data[0]);
         }
     }
-
-    if (oc->oformat->flags & AVFMT_RAWPICTURE) {
-        /* raw video case. The API will change slightly in the near
-           futur for that */
+    /* encode the image */
+    out_size = avcodec_encode_video(c, video_outbuf, video_outbuf_size, picture);
+    /* if zero size, it means the image was buffered */
+    if (out_size > 0) {
         AVPacket pkt;
         av_init_packet(&pkt);
 
-        pkt.flags |= AV_PKT_FLAG_KEY;
+        if (c->coded_frame->pts != (int)AV_NOPTS_VALUE)
+            pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, st->time_base);
+        if(c->coded_frame->key_frame)
+            pkt.flags |= AV_PKT_FLAG_KEY;
         pkt.stream_index= st->index;
-        pkt.data= (uint8_t *)picture;
-        pkt.size= sizeof(AVPicture);
-
-            ret = av_interleaved_write_frame(oc, &pkt);
-
-	    /*AVPacket out;
-	    av_init_packet(&out);
-	    //int av_interleave_packet_per_dts( AVFormatContext * s, AVPacket * out, AVPacket * pkt, int flush)
-
-	    int inter = av_interleave_packet_per_dts(oc, &out, &pkt, 1);
-
-	    if (inter == 1) { 
-		printf("Success!\n"); 
-
-	    	int ret = av_write_frame(oc, &out);
-
-	        addFrame((char *)out.data, out.size); //OBADA ADD
-	    }*/
-    } else {
-        /* encode the image */
-        out_size = avcodec_encode_video(c, video_outbuf, video_outbuf_size, picture);
-        //out_size=5;
-        /* if zero size, it means the image was buffered */
-        if (out_size > 0) {
-            AVPacket pkt;
-            av_init_packet(&pkt);
-
-            if (c->coded_frame->pts != (int)AV_NOPTS_VALUE)
-                pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, st->time_base);
-            if(c->coded_frame->key_frame)
-                pkt.flags |= AV_PKT_FLAG_KEY;
-            pkt.stream_index= st->index;
-            pkt.data= video_outbuf;
-            pkt.size= out_size;
-
-            /* write the compressed frame in the media file */
-            ret = av_interleaved_write_frame(oc, &pkt);
-//	    if(ret == 1)
-
-	    AVPacket out;
-	    av_init_packet(&out);
-	    //int av_interleave_packet_per_dts( AVFormatContext * s, AVPacket * out, AVPacket * pkt, int flush)
-
-	    int inter = av_interleave_packet_per_dts(oc, &out, &pkt, 1);
-
-	    if (inter == 1) { 
-		printf("Success!\n"); 
-
-	    	int ret = av_write_frame(oc, &out);
-		
-		fprintf(stderr, "Sending: %d\n", out.size);
-	        //addFrame((char *)out.data, pkt.size); //OBADA ADD
-		//addFrameByFile(filename,"frame");
-	    }
-        }
-    }
-    /*if (inter < 0) {
-        fprintf(stderr, "Error while writing video frame\n");
-        exit(1);
-    }*/
+        pkt.data= video_outbuf;
+        pkt.size= out_size;
+		iPktSize= out_size;
+        /* write the compressed frame in the media file */
+        ret = av_interleaved_write_frame(oc, &pkt);
+	}
     frame_count++;
     printf("Im here\n"); fflush(stdout);
  //   av_free(picture);
 }
 
-static void close_video(AVFormatContext *oc, AVStream *st)
+void close_video(AVFormatContext *oc, AVStream *st)
 {
     avcodec_close(st->codec);
  //   av_free(picture.data); // Doubley freeing this array - AHB
@@ -166,7 +123,7 @@ static void close_video(AVFormatContext *oc, AVStream *st)
 }
 
 
-static void open_webcam()
+void open_webcam()
 {
 	int temp = -1;
 	AVInputFormat		*pWebcamInputFormat;
@@ -225,12 +182,12 @@ static void open_webcam()
 
 
 // GEORGE method
-static void close_webcam()
+void close_webcam()
 {
 	//av_free(pFrameDec);
 }
 
-static void open_video(AVFormatContext *oc, AVStream *st)
+void open_video(AVFormatContext *oc, AVStream *st)
 {
     AVCodec *codec;
     AVCodecContext *c;
@@ -284,7 +241,7 @@ static void open_video(AVFormatContext *oc, AVStream *st)
 
 
 /* add a video output stream */
-static AVStream *add_video_stream(AVFormatContext *oc, enum CodecID codec_id)
+AVStream *add_video_stream(AVFormatContext *oc, enum CodecID codec_id)
 {
     AVCodecContext *c;
     AVStream *st;

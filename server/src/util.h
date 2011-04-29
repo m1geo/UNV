@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 #ifndef UNV_UTIL
-#define UNV_UTIL 1
+#define UNV_UTIL 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -78,18 +78,18 @@ extern int frame_count, video_outbuf_size;
 extern int							iYUVFrameSize;
 extern int							iOutBufferSize;
 extern uint8_t 					*pYUVBufferVid;
-extern static struct SwsContext	*swsC_YUV;
+extern struct SwsContext	*swsC_YUV;
 extern int 						swsR_YUV;
+extern int iPktSize;
 
-
-extern const char *filename;
+extern char *filename;
 
 
 
 
 /**************************************************************/
 
-static AVFrame *alloc_picture(enum PixelFormat , int, int);
+AVFrame *alloc_picture(enum PixelFormat , int, int);
 
 char * AVERROR_LOOKUP(int );
 char * PIX_FMT_LOOKUP(int );

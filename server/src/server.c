@@ -5,14 +5,20 @@
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 
 #include <libswscale/swscale.h>
-#include <stdlib>
-#include <stdio>
 
-char filename[] = "test.mkv";
-#define STREAM_DURATION 5.0
+#include "rtspServer.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+
+
+#define STREAM_DURATION 100.0
 #define STREAM_FRAME_RATE 25
 #define STREAM_NB_FRAMES ((int) (STREAM_DURATION*STREAM_FRAME_RATE))
 #define STREAM_PIX_FMT PIX_FMT_YUV420P
+
+#define min(a,b) ((a<=b)? a:b)
+
 
 int main(int argc, char *argv[]) {
 
@@ -23,10 +29,10 @@ int main(int argc, char *argv[]) {
     int i;
     
     long int iFrame = 0;
-
+	setup_ffmpeg();
 	printf("This program attempts to make %f seconds of video/audio from webcam\n", STREAM_DURATION);
 
-    fmt = av_guess_format("mpeg", NULL, NULL);
+    fmt = av_guess_format(NULL, filename, NULL);
     
     if (!fmt) {
         fprintf(stderr, "Could not find suitable output format\n");
@@ -80,15 +86,21 @@ video codecs and allocate the necessary encode buffers */
             exit(1);
         }
     }
-
+    startServerRTSP(20,30015,3015);
+    printf("WAITING\n");
+	sleep(10);
     /* write the stream header, if any */
     av_write_header(oc);
-    //addFrameByFile(filename,"header");
+        //addFrameByFile(filename,"header");
     //addHeader(pHead) //OABDA - How? what is oc?
     
-
+	addFrame((char *) oc->pb->buf_ptr, 552);
+	iPktSize = 552;
+	iFrame =0;
+	//exit(1);
     for(;;) {
-		printf("1\rFrame %5ld ", iFrame);
+		if(iPktSize !=0 && iFrame > 0) addFrame((char *) oc->pb->buffer, min(iPktSize, oc->pb->buf_ptr - oc->pb->buffer));
+		printf("1\rFrame %5ld: iPktsize: %d , Diff: %d\n", iFrame, iPktSize, oc->pb->buf_end - oc->pb->buf_ptr);
         /* compute current audio and video time */
         if (audio_st)
             audio_pts = (double)audio_st->pts.val * audio_st->time_base.num / audio_st->time_base.den;
@@ -110,6 +122,9 @@ video codecs and allocate the necessary encode buffers */
         } else {
             write_video_frame(oc, video_st);
         }
+        
+       // addFrame((char*) oc->pb->buf_ptr, oc->pb->buffer_size );
+        
         iFrame++;
     }
 printf("\n");
@@ -143,7 +158,7 @@ for(i = 0; i < (int)oc->nb_streams; i++) {
     av_free(oc);
 
     //return 0;
-    dontDie();
+   // dontDie();
     
 
 }
