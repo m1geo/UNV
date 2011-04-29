@@ -1,4 +1,4 @@
-#include "util.h"
+
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 
@@ -17,6 +17,15 @@ int audio_input_frame_size;
 AVFrame *picture, *tmp_picture;
 uint8_t *video_outbuf;
 int frame_count, video_outbuf_size;
+
+/* Encoder stuffs */
+int							iYUVFrameSize;
+int							iOutBufferSize;
+uint8_t 					*pYUVBufferVid;
+static struct SwsContext	*swsC_YUV;
+int 						swsR_YUV;
+
+
 
 const char *filename;
 

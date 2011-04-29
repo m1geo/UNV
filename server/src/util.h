@@ -74,6 +74,14 @@ extern AVFrame *picture, *tmp_picture;
 extern uint8_t *video_outbuf;
 extern int frame_count, video_outbuf_size;
 
+
+extern int							iYUVFrameSize;
+extern int							iOutBufferSize;
+extern uint8_t 					*pYUVBufferVid;
+extern static struct SwsContext	*swsC_YUV;
+extern int 						swsR_YUV;
+
+
 extern const char *filename;
 
 

@@ -7,14 +7,10 @@
 
 #include "util.h"
 
-	AVCodecContext  			*pCodecCtxVidEncMPEG;
-	AVCodec						*pCodecVidEncMPEG;
-	AVFrame						*pFrameEncMPEG;
-	int							iYUVFrameSize;
-	int							iOutBufferSize;
-	uint8_t 					*pYUVBufferVid;
-	static struct SwsContext	*swsC_YUV;
-	int 						swsR_YUV;
+AVCodecContext  			*pCodecCtxVidEncMPEG;
+AVCodec						*pCodecVidEncMPEG;
+AVFrame						*pFrameEncMPEG;
+
 
 
 
