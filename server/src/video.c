@@ -64,12 +64,12 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
            frames if using B frames, so we get the last frames by
            passing the same picture again */
     } else {
-        if (c->pix_fmt != pWebcamCodecContext->pix_fmt) {  // Change to YUV222P AHB - GCS back to YUYV422
+        if (c->pix_fmt != pWebcamCodecContext->pix_fmt) {  
             /* as we only generate a YUV420P picture, we must convert it
                to the codec pixel format if needed */
             if (img_convert_ctx == NULL) {
                 img_convert_ctx = sws_getContext(c->width, c->height,
-                                                 pWebcamCodecContext->pix_fmt,  // GEORGE was YUYV422 - Must be as above
+                                                 pWebcamCodecContext->pix_fmt,  
                                                  c->width, c->height,
                                                  c->pix_fmt,
                                                  sws_flags, NULL, NULL, NULL);

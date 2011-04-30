@@ -126,6 +126,7 @@ video codecs and allocate the necessary encode buffers */
        // addFrame((char*) oc->pb->buf_ptr, oc->pb->buffer_size );
         
         iFrame++;
+        if (iFrame>10) iFrame=10;
     }
 printf("\n");
 
