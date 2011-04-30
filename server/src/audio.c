@@ -126,23 +126,6 @@ void write_audio_frame(AVFormatContext *oc, AVStream *st)
         fprintf(stderr, "Error while writing audio frame\n");
         exit(1);
     }
-            int ret = av_interleaved_write_frame(oc, &pkt);
-
-	 //   if(ret == 1)
-	//	addFrameByFile(filename,"frame");
-	    /*AVPacket out;
-	    av_init_packet(&out);
-	    //int av_interleave_packet_per_dts( AVFormatContext * s, AVPacket * out, AVPacket * pkt, int flush)
-
-	    int inter = av_interleave_packet_per_dts(oc, &out, &pkt, 1);
-
-	    if (inter == 1) { 
-		printf("Success!\n"); 
-
-	    	int ret = av_write_frame(oc, &out);
-
-	        addFrame((char *)pkt.data, pkt.size); //OBADA ADD
-	    }*/
 }
 
 void close_audio(AVFormatContext *oc, AVStream *st)

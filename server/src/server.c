@@ -1,3 +1,16 @@
+//
+//      (C) 30/Apr/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
+//		The UNV Project, Electronic Enginering, University College London
+//
+//		Based on
+//			http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+//			http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+//			http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html
+//
+//		Libraries
+//			avformat avcodec avutil avdevice swscale
+//
+
 #include "video.h"
 #include "audio.h"
 #include "util.h"
@@ -10,15 +23,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
-
-#define STREAM_DURATION 100.0
-#define STREAM_FRAME_RATE 25
-#define STREAM_NB_FRAMES ((int) (STREAM_DURATION*STREAM_FRAME_RATE))
-#define STREAM_PIX_FMT PIX_FMT_YUV420P
-
-#define min(a,b) ((a<=b)? a:b)
-
 
 int main(int argc, char *argv[]) {
 
@@ -86,21 +90,20 @@ video codecs and allocate the necessary encode buffers */
             exit(1);
         }
     }
+    	
+	FILE * db = fopen("debug.mkv","wb");
     startServerRTSP(20,30015,3015);
     printf("WAITING\n");
 	sleep(10);
     /* write the stream header, if any */
     av_write_header(oc);
-        //addFrameByFile(filename,"header");
-    //addHeader(pHead) //OABDA - How? what is oc?
-    
-	addFrame((char *) oc->pb->buf_ptr, 552);
-	iPktSize = 552;
+	addFrame((char *) oc->pb->buffer, 552);	// send the header...
+	fwrite (oc->pb->buffer, 1 , 552 , db );
 	iFrame =0;
-	//exit(1);
+
+	
     for(;;) {
-		if(iPktSize !=0 && iFrame > 0) addFrame((char *) oc->pb->buffer, min(iPktSize, oc->pb->buf_ptr - oc->pb->buffer));
-		printf("1\rFrame %5ld: iPktsize: %d , Diff: %d\n", iFrame, iPktSize, oc->pb->buf_end - oc->pb->buf_ptr);
+		printf("\rFrame %5ld", iFrame);
         /* compute current audio and video time */
         if (audio_st)
             audio_pts = (double)audio_st->pts.val * audio_st->time_base.num / audio_st->time_base.den;
@@ -123,13 +126,19 @@ video codecs and allocate the necessary encode buffers */
             write_video_frame(oc, video_st);
         }
         
-       // addFrame((char*) oc->pb->buf_ptr, oc->pb->buffer_size );
-        
+        // Write it to the network.
+        long unsigned int diff = (oc->pb->buf_ptr - oc->pb->buffer);
+		int minim = min(iPktSize, diff);
+		//if (minim > 12) minim -= 12;
+		if(iPktSize !=0 && iFrame > 0) {
+			addFrame((char *) oc->pb->buffer, diff);
+			fwrite (oc->pb->buffer, 1 , diff , db );
+		}
         iFrame++;
-        if (iFrame>10) iFrame=10;
     }
-printf("\n");
-
+	printf("\n");
+	fclose(db); /*done!*/ 
+	
     /* write the trailer, if any. the trailer must be written
 * before you close the CodecContexts open when you wrote the
 * header; otherwise write_trailer may try to use memory that

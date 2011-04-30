@@ -34,23 +34,20 @@
 #define UINT64_C(c) (c ## ULL)
 #endif
 
-//extern "C" {	// required for compiling in C++ - Thanks Obada! :D
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 
 #include <libswscale/swscale.h>
-//#include "video.h"
-//#include "audio.h"
-//}
-//#include "pix_fmt_lookup.h"
+
+#define min(a,b) ((a<=b)? a:b)
+
+
+#define STREAM_DURATION 	100.0
+#define STREAM_FRAME_RATE 	25
+#define STREAM_NB_FRAMES	((int) (STREAM_DURATION*STREAM_FRAME_RATE))
+#define STREAM_PIX_FMT		PIX_FMT_YUV420P
 
 #undef exit
-
-/* 5 seconds stream duration */
-#define STREAM_DURATION   100.0
-#define STREAM_FRAME_RATE 25 /* 25 images/s */
-#define STREAM_NB_FRAMES  ((int)(STREAM_DURATION * STREAM_FRAME_RATE))
-#define STREAM_PIX_FMT PIX_FMT_YUV420P /* default pix_fmt */
 
 #define FALSE	0
 #define TRUE	!FALSE

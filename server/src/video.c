@@ -1,3 +1,16 @@
+//
+//      (C) 30/Apr/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
+//		The UNV Project, Electronic Enginering, University College London
+//
+//		Based on
+//			http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+//			http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+//			http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html
+//
+//		Libraries
+//			avformat avcodec avutil avdevice swscale
+//
+
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 
@@ -5,24 +18,17 @@
 #include "util.h"
 #include "rtspServer.h"
 
-
 AVFormatContext		*pWebcamFormatContext;
 AVCodecContext		*pWebcamCodecContext;
 AVCodec				*pWebcamCodec;
 AVFrame				*pFrameDec;		// YUYV422
-AVPacket		pWebcamPacket;
+AVPacket			pWebcamPacket;
 int					iVideoStream=-1;
 
-
-
-void setup_ffmpeg(){
+void setup_ffmpeg() {
 	av_register_all();
     avdevice_register_all();
 }
-
-
-
-
 
 AVFrame * get_webcam_frame()
 {
@@ -53,7 +59,7 @@ AVFrame * get_webcam_frame()
 
 void write_video_frame(AVFormatContext *oc, AVStream *st)
 {
-    int out_size, ret;
+    int out_size;
     AVCodecContext *c;
     static struct SwsContext *img_convert_ctx;
 
@@ -93,7 +99,6 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
     if (out_size > 0) {
         AVPacket pkt;
         av_init_packet(&pkt);
-
         if (c->coded_frame->pts != (int)AV_NOPTS_VALUE)
             pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, st->time_base);
         if(c->coded_frame->key_frame)
@@ -103,7 +108,10 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
         pkt.size= out_size;
 		iPktSize= out_size;
         /* write the compressed frame in the media file */
-        ret = av_interleaved_write_frame(oc, &pkt);
+		if (av_interleaved_write_frame(oc, &pkt) != 0) {
+			fprintf(stderr, "Error while writing audio frame\n");
+			exit(1);
+		}
 	}
     frame_count++;
     printf("Im here\n"); fflush(stdout);
@@ -113,15 +121,12 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
 void close_video(AVFormatContext *oc, AVStream *st)
 {
     avcodec_close(st->codec);
- //   av_free(picture.data); // Doubley freeing this array - AHB
     av_freep(picture); // This is the *RIGHT* way to free these see: http://wiki.aasimon.org/doku.php?id=ffmpeg:ffmpeg AHB
     if (tmp_picture) {
- //       av_free(tmp_picture->data); // Doubley freeing this array - AHB
         av_free(tmp_picture); 
     }
     av_free(video_outbuf);
 }
-
 
 void open_webcam()
 {
@@ -175,11 +180,8 @@ void open_webcam()
 		printf("couldn't open decoder codec\n");
 	}
 	
-	printf("WebCam Init Complete\n");
-	//PIX_FMT_LOOKUP(pWebcamCodecContext->pix_fmt);
+	printf("WebCam Init Complete : %s format\n", PIX_FMT_LOOKUP(pWebcamCodecContext->pix_fmt));
 }
-
-
 
 // GEORGE method
 void close_webcam()
@@ -238,7 +240,6 @@ void open_video(AVFormatContext *oc, AVStream *st)
         }
     }
 }
-
 
 /* add a video output stream */
 AVStream *add_video_stream(AVFormatContext *oc, enum CodecID codec_id)

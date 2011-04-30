@@ -7,16 +7,12 @@
 #ifndef UNVVIDEO
 #define UNVVIDEO 
 
-
-
-
-
 /* General Global Variables */
 extern AVFormatContext		*pWebcamFormatContext;
 extern AVCodecContext		*pWebcamCodecContext;
 extern AVCodec				*pWebcamCodec;
 extern AVFrame				*pFrameDec;		// YUYV422
-extern AVPacket		pWebcamPacket;
+extern AVPacket				pWebcamPacket;
 extern int					iVideoStream;
 
 

@@ -1,23 +1,6 @@
-//      gs.h	Header File
-//      
-//      Copyright 2010 George Smart, M1GEO <george.smart@ucl.ac.uk>
 //
-//		Written for the UNV Project, E&EE, University College London.
-//      
-//      This program is free software; you can redistribute it and/or modify
-//      it under the terms of the GNU General Public License as published by
-//      the Free Software Foundation; either version 2 of the License, or
-//      (at your option) any later version.
-//      
-//      This program is distributed in the hope that it will be useful,
-//      but WITHOUT ANY WARRANTY; without even the implied warranty of
-//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//      GNU General Public License for more details.
-//      
-//      You should have received a copy of the GNU General Public License
-//      along with this program; if not, write to the Free Software
-//      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-//      MA 02110-1301, USA.
+//      (C) 30/Apr/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
+//		The UNV Project, Electronic Enginering, University College London
 //
 //		Based on
 //			http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
@@ -25,11 +8,7 @@
 //			http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html
 //
 //		Libraries
-//			avformat 
-//			avcodec
-//			avutil 
-//			avdevice 
-//			swscale
+//			avformat avcodec avutil avdevice swscale
 //
 
 #ifndef INT64_C

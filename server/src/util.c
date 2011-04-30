@@ -1,3 +1,15 @@
+//
+//      (C) 30/Apr/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
+//		The UNV Project, Electronic Enginering, University College London
+//
+//		Based on
+//			http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+//			http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+//			http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html
+//
+//		Libraries
+//			avformat avcodec avutil avdevice swscale
+//
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
