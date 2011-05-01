@@ -5,6 +5,27 @@
 #include "util.h"
 
 
+
+#define INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
+
+#define AUDIO_INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
+
+#define AUDIO_REFILL_THRESH 4096
+
+#define SAMPLE_RATE 44100
+#define BITRATE 256000
+#define CHANNELS 2
+#define SIZE 2
+
+
+AVFormatContext 	*pMicFormatContext;
+AVCodecContext		*pMicCodecContext;
+AVCodec				*pMicCodec;
+AVFrame				*pMicDec;		
+AVPacket			pMicPacket;
+int 				iAudioStream;
+
+
 /*
  * add an audio output stream
  */
@@ -50,8 +71,61 @@ void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
     }
 }
 
+void open_microphone() {
+	int temp = -1;
+	AVInputFormat		*pMicInputFormat;
+	AVFormatParameters	FormatParamAudDec;
+
+	FormatParamAudDec.sample_rate = SAMPLE_RATE;
+    FormatParamAudDec.channels = CHANNELS;
+    FormatParamAudDec.time_base = (AVRational){1, SAMPLE_RATE};
+    FormatParamAudDec.audio_codec_id = CODEC_TYPE_AUDIO;
+    
+	pMicInputFormat = av_find_input_format("alsa");
+
+	temp = av_open_input_file(&pMicFormatContext, "plughw:0", pMicInputFormat, 0, &FormatParamAudDec);
+	if(temp !=0) {
+		printf("Couldn't open Microphone. Error code %d - %s\n", temp, AVERROR_LOOKUP(temp));
+		exit(EXIT_FAILURE);
+	}
+	
+	temp = av_find_stream_info(pMicFormatContext);
+	if(temp<0) {
+		printf("couldn't find stream infomation\n");
+		exit(EXIT_FAILURE);
+	}
+
+	iAudioStream=-1;
+	for(temp=0; temp<(int)pMicFormatContext->nb_streams; temp++) {
+		if(pMicFormatContext->streams[temp]->codec->codec_type==CODEC_TYPE_AUDIO) {
+			iAudioStream=temp;
+			break;
+		}
+	}
+	if(iAudioStream == -1) {
+		printf("couldn't select Audio stream\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	pMicCodecContext=pMicFormatContext->streams[iAudioStream]->codec; 
+	pMicCodec=avcodec_find_decoder(pMicCodecContext->codec_id);
+	if(pMicCodec==NULL) {
+		fprintf(stderr, "Audio: couldn't find required codec\n");
+	}
+	
+	temp = avcodec_open(pMicCodecContext, pMicCodec);
+	if(temp<0) {
+		printf("couldn't open decoder codec\n");
+	}
+	
+	printf("Audio Init Complete\n");
+}
+
+
+
  void open_audio(AVFormatContext *oc, AVStream *st)
 {
+
     AVCodecContext *c;
     AVCodec *codec;
 
@@ -99,6 +173,12 @@ void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
     samples = (int16_t*)av_malloc(audio_input_frame_size * 2 * c->channels);
 }
 
+void get_mic_samples(int16_t *sample, int size) {
+	int len;
+	AVPacket pkt;
+	av_read_frame(pMicFormatContext, &pkt);
+	len =  avcodec_decode_audio3(pMicCodecContext, sample, &size, &pkt);
+}
 
 
 
@@ -110,8 +190,9 @@ void write_audio_frame(AVFormatContext *oc, AVStream *st)
 
     c = st->codec;
 
-    get_audio_frame(samples, audio_input_frame_size, c->channels);
-
+    //get_audio_frame(samples, audio_input_frame_size, c->channels);
+	get_mic_samples(samples, audio_input_frame_size);
+	
     pkt.size= avcodec_encode_audio(c, audio_outbuf, audio_outbuf_size, samples);
    // iPktSize=0;
 	iPktSize= pkt.size;
