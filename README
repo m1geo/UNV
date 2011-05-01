@@ -13,12 +13,18 @@ the mess of compiling C with a C++ compiler.  I changed header files so that the
 result, I had to change the make files, too.  I removed the runClient.cpp program as a shell script is more appropriate.
 
 -- Compiling
-To compile this program, 'cd' into either the server or client folders and run make.  You need to have 'bin' and 'exec' folders (should be empty) and 'src' containing the source files.
+To compile this program, 'cd' into either the server or client folders and run make.  You need to have 'bin' and 'exec' 
+folders (should be empty) and 'src' containing the source files.
 
 -- Usage
-To use the program, you start the server.  This sets the video source up, and then waits for 10 seconds.  You need to ensure the client connects in this time, as after this time, the header is sent.  Only one header is sent as due to the nature of the player/client, it is not possible to send more than one header - it confuses VLC and the file becomes invalid.
+To use the program, you start the server.  This sets the video source up, and then waits for 10 seconds.  You need to 
+ensure the client connects in this time, as after this time, the header is sent.  Only one header is sent as due to the
+nature of the player/client, it is not possible to send more than one header - it confuses VLC and the file becomes
+invalid.
 
-Once the header is received, you will notice that the player starts at about 200 frames received. If you pipe the client output to a file, you get a valid MKV file (mkvtoolnix approved), and it plays in VLC, Mplayer, and Totem - It also has test audio.  This release doesn't contain microphone audio, but a test sweep tone.
+Once the header is received, you will notice that the player starts at about 200 frames received. If you pipe the client
+output to a file, you get a valid MKV file (mkvtoolnix approved), and it plays in VLC, Mplayer, and Totem - It also has
+test audio.  This release doesn't contain microphone audio, but a test sweep tone.
 
 -- Issues
  * Only one header is sent.  If the sync is lost, it should recover with the old header - if not, then it's currently tough.
