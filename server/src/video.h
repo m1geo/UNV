@@ -1,3 +1,8 @@
+//
+//      (C) 01/May/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
+//		The UNV Project, Electronic Enginering, University College London
+//
+
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h> 

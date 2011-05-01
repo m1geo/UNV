@@ -14,15 +14,15 @@
 #include "video.h"
 #include "audio.h"
 #include "util.h"
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavdevice/avdevice.h> 
-#include <libswscale/swscale.h>
-
 #include "rtspServer.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h> 
+#include <libswscale/swscale.h>
 
 int main(int argc, char *argv[]) {
 
@@ -36,7 +36,12 @@ int main(int argc, char *argv[]) {
     
     long int iFrame = 0;
 	setup_ffmpeg();
-	printf("This program attempts to make %f seconds of video/audio from webcam\n", STREAM_DURATION);
+	
+	// Read CLI Options, and error if not vaild
+	if ( (argc<=1)||(get_options(argc, argv)) ) {
+		fprintf(stderr, "error parsing CLI options - couldn't understand options. Run with --help.");
+		exit(EXIT_FAILURE);
+	}
 
     fmt = av_guess_format(NULL, filename, NULL);
     
@@ -65,8 +70,7 @@ and initialize the codecs */
         audio_st = add_audio_stream(oc, fmt->audio_codec);
     }
 
-    /* set the output parameters (must be done even if no
-parameters). */
+    /* set the output parameters (must be done even if no parameters). */
     if (av_set_parameters(oc, NULL) < 0) {
         fprintf(stderr, "Invalid output format parameters\n");
         exit(1);
@@ -75,7 +79,7 @@ parameters). */
     dump_format(oc, 0, filename, 1);
 
     /* now that all the parameters are set, we can open the audio and
-video codecs and allocate the necessary encode buffers */
+	video codecs and allocate the necessary encode buffers */
        
     open_webcam();
     
@@ -83,8 +87,7 @@ video codecs and allocate the necessary encode buffers */
         open_video(oc, video_st);
     if (audio_st)
         open_audio(oc, audio_st);
-
-
+        
     /* open the output file, if needed */
     if (!(fmt->flags & AVFMT_NOFILE)) {
         if (url_fopen(&oc->pb, filename, URL_WRONLY) < 0) {
@@ -94,8 +97,9 @@ video codecs and allocate the necessary encode buffers */
     }
     
     startServerRTSP(20,30015,3015);
-    printf("WAITING\n");
-	sleep(10);
+    printf("Waiting for 10 seconds for client to connect, before starting.\n");
+	sleep(10);	// allow client to connect before the server starts, so that client receives header!
+	
     /* write the stream header, if any */
     av_write_header(oc);
 	addFrame((char *) oc->pb->buffer, 552);	// send the header...
@@ -145,13 +149,9 @@ video codecs and allocate the necessary encode buffers */
         iFrame++;
     }
 	
-    /* write the trailer, if any. the trailer must be written
-* before you close the CodecContexts open when you wrote the
-* header; otherwise write_trailer may try to use memory that
-* was freed on av_codec_close() */
-
-	// NOTE TO GEORGE - NEEDS TO SEND TRAILER TO BE NICE :)
-    //av_write_trailer(oc);
+	// write trailer
+    av_write_trailer(oc);
+	addFrame((char *) oc->pb->buffer, oc->pb->buf_ptr - oc->pb->buffer);	// send the trailer...
 
     /* close each codec */
     if (video_st)
@@ -161,22 +161,18 @@ video codecs and allocate the necessary encode buffers */
         
     close_webcam();
 
-    /* free the streams */
-   
-for(i = 0; i < (int)oc->nb_streams; i++) {
+	// free the streams
+	for(i = 0; i < (int)oc->nb_streams; i++) {
         av_freep(&oc->streams[i]->codec);
         av_freep(&oc->streams[i]);
     }
-   if (!(fmt->flags & AVFMT_NOFILE)) {
-        /* close the output file */
+	
+	if (!(fmt->flags & AVFMT_NOFILE)) {
         url_fclose(oc->pb);
     }
-
-    /* free the stream */
-    av_free(oc);
-
-    //return 0;
-   // dontDie();
     
-
+    av_free(oc);
+	
+	printf("Clean Exit\n");
+	exit(EXIT_SUCCESS);
 }

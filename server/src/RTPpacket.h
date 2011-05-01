@@ -1,9 +1,12 @@
-/*
- * RTPpacket.h
- *
- *  Created on: 27 Nov 2010
- *      Author: obada
- */
+//
+//      (C) 01/May/2011 - Obada
+//		The UNV Project, Electronic Enginering, University College London
+//
+//		Based on
+//			http://tldp.org/LDP/LG/issue74/tougher.html#4
+//			http://www.ibm.com/developerworks/linux/tutorials/l-sock2/section4.html
+//			http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
+//
 
 #ifndef RTPPACKET_H_
 #define RTPPACKET_H_
@@ -23,4 +26,4 @@ public:
 	virtual ~RTPpacket();
 };
 
-#endif /* RTPPACKET_H_ */
+#endif

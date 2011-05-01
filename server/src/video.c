@@ -2,14 +2,6 @@
 //      (C) 30/Apr/2011 - George Smart, M1GEO <george.smart@ucl.ac.uk>
 //		The UNV Project, Electronic Enginering, University College London
 //
-//		Based on
-//			http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
-//			http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
-//			http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html
-//
-//		Libraries
-//			avformat avcodec avutil avdevice swscale
-//
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -32,7 +24,6 @@ void setup_ffmpeg() {
 
 AVFrame * get_webcam_frame()
 {
-	
 	int				iFrameFinished=0;
 	int 			temp;
 
@@ -51,8 +42,6 @@ AVFrame * get_webcam_frame()
 		}
 	av_free_packet(&pWebcamPacket);
 	} while (!iFrameFinished);	
-	
-	//printf("\n\rPICTURE DATA 1:       %lu\n", pFrameDec->data[0]); fflush(stdout);
 	
 	return (pFrameDec);
 }
@@ -84,15 +73,13 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
                     exit(1);
                 }
             }
-            //fill_yuv_image(tmp_picture, frame_count, c->width, c->height);
             tmp_picture=get_webcam_frame();
             sws_scale(img_convert_ctx, (const uint8_t* const*) tmp_picture->data, tmp_picture->linesize, 0, c->height, picture->data, picture->linesize);
         } else {
-            //fill_yuv_image(picture, frame_count, c->width, c->height);
             picture=get_webcam_frame();
-            //printf("PICTURE DATA 2:       %lu\n", picture->data[0]);
         }
     }
+    
     /* encode the image */
     out_size = avcodec_encode_video(c, video_outbuf, video_outbuf_size, picture);
     /* if zero size, it means the image was buffered */
@@ -114,7 +101,6 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
 		}
 	}
     frame_count++;
- //   av_free(picture);
 }
 
 void close_video(AVFormatContext *oc, AVStream *st)
@@ -132,7 +118,7 @@ void open_webcam()
 	int temp = -1;
 	AVInputFormat		*pWebcamInputFormat;
 	
-/*
+/*	UNUSED AT THE MOMENT
 	AVFormatParameters	WebcamFormatParams;
 	WebcamFormatParams.channel = 0;
 	WebcamFormatParams.standard = "pal";
@@ -182,10 +168,9 @@ void open_webcam()
 	printf("WebCam Init Complete : %s format\n", PIX_FMT_LOOKUP(pWebcamCodecContext->pix_fmt));
 }
 
-// GEORGE method
 void close_webcam()
 {
-	//av_free(pFrameDec);
+	av_free(pFrameDec);
 }
 
 void open_video(AVFormatContext *oc, AVStream *st)
