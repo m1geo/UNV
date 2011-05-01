@@ -36,9 +36,18 @@ int 						swsR_YUV;
 int 						iPktSize;
 struct cliOpts_t 			cliOpts;
 
+static const char *optString = "vf:r:m:u:p:h";
 
-
-
+static const struct option longOpts[] = {
+	{ "verbose",	no_argument, 		NULL, 'v' },
+	{ "formats",	no_argument, 		NULL, 'f' },
+	{ "resolution",	required_argument, 	NULL, 'r' },
+	{ "mode",		required_argument, 	NULL, 'm' },
+	{ "url",		required_argument, 	NULL, 'u' },
+	{ "port",		required_argument,	NULL, 'p' },
+	{ "help",		no_argument, 		NULL, 'h' },
+	{ NULL,			no_argument, 		NULL, 0 }
+};
 
 struct cliOpts_t 
 {	
@@ -429,7 +438,7 @@ int get_options (int c, char ** v) {
 				
 			default:
 				// Never happens, but just to be sure...
-				fail("get_options", "hit impossible DEFAULT case ??", TRUE);
+				printf("get_options is poorly sick\n");
 				break;
 		}
 		opt = getopt_long( c, v, optString, longOpts, &longIndex );

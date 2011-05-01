@@ -125,7 +125,7 @@ void sendHeader()
 	iSent = sendto(iUDP_Sock, pRTP_Packet, iRTP_PacketSize, 0, (struct sockaddr *) &structUDP_Client, sizeof(structUDP_Client));
 
 	//Give the screen an update
-	cout << "Sending header of size " << iSent << " bytes" << endl;
+	cout << "header size " << iSent << "b" << endl;
 
 }
 
@@ -311,6 +311,18 @@ extern "C" void startServerRTSP(int iSetQueueSize, int iSetTCP, int iSetUDP)
 {
 	boost::thread serverRTSP(&threadStartServerRTSP, iSetQueueSize, iSetTCP, iSetUDP);
 }
+
+void addHeader(char* pFrameIn, int iFrameSize)
+{
+	 //Set pointer to new byte array of requires size
+	 pVidHeader = new char [iFrameSize];
+
+	 //Copy the incoming byte array and set to the new pointer
+	 memcpy(pVidHeader, pFrameIn, iFrameSize);
+
+	 //Save the frame size to our global variable
+	 iVidHeaderSize = iFrameSize;
+}//END addHeader function
 
 //Function to add video frame to the queue
 extern "C" void addFrame(char* pFrameIn, int iFrameSize)
