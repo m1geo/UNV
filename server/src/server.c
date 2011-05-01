@@ -197,16 +197,17 @@ int main(int argc, char *argv[]) {
     int i;
     long int iFrame = 0;
     
-
+    printf("The UNV Project - Server\n");
+	printf("Department of Electronic & Electrical Engineering\n");
+	printf("University College London\n\n");
 	
 	// Read CLI Options, and error if not vaild
 	if ( (argc<=1)||(get_options(argc, argv)) ) {
-		fprintf(stderr, "error parsing CLI options - couldn't understand options. Run with --help.");
-		exit(EXIT_FAILURE);
+		printf("Invalid or missing command line options.\n");
+		printf("Run %s --help for more information.\n\n", argv[0]);
+		exit(EXIT_SUCCESS);
 	}
-
-        
-  
+	
     startServerRTSP(20,30015,3015);
     printf("Waiting for 10 seconds for client to connect, before starting.\n");
 	sleep(10);	// allow client to connect before the server starts, so that client receives header!
