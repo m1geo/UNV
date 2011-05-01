@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
     AVFormatContext *oc;
     AVStream *audio_st, *video_st;
     double audio_pts, video_pts;
+    long int diff;
+    unsigned char * old_buf_ptr;
     int i;
     
     long int iFrame = 0;
@@ -90,18 +92,16 @@ video codecs and allocate the necessary encode buffers */
             exit(1);
         }
     }
-    	
-	FILE * db = fopen("debug.mkv","wb");
+    
     startServerRTSP(20,30015,3015);
     printf("WAITING\n");
 	sleep(10);
     /* write the stream header, if any */
     av_write_header(oc);
 	addFrame((char *) oc->pb->buffer, 552);	// send the header...
-	fwrite (oc->pb->buffer, 1 , 552 , db );
 	iFrame =0;
 
-	
+	old_buf_ptr = oc->pb->buf_ptr;
     for(;;) {
 		printf("\rFrame %5ld", iFrame);
         /* compute current audio and video time */
@@ -127,22 +127,30 @@ video codecs and allocate the necessary encode buffers */
         }
         
         // Write it to the network.
-        long unsigned int diff = (oc->pb->buf_ptr - oc->pb->buffer);
-		int minim = min(iPktSize, diff);
-		//if (minim > 12) minim -= 12;
-		if(iPktSize !=0 && iFrame > 0) {
-			addFrame((char *) oc->pb->buffer, diff);
-			fwrite (oc->pb->buffer, 1 , diff , db );
+        
+        // THIS PIECE OF CODE TOO ABOUT 20 HOURS TO GET RIGHT
+        // ANYBODY BREAKS THIS, AND I WILL KILL THEM
+        //    GS, 2:26AM, 1ST MAY 2011
+		diff = (oc->pb->buf_ptr - old_buf_ptr);
+		if (oc->pb->buf_ptr == oc->pb->buffer) { // buffer got flushed
+			old_buf_ptr = oc->pb->buf_ptr;
+		} else if (diff < 0) { // wrapped buffer
+			addFrame((char *) old_buf_ptr,  oc->pb->buf_end - old_buf_ptr);
+			addFrame((char *) oc->pb->buffer, oc->pb->buf_ptr - oc->pb->buffer);
+			old_buf_ptr = oc->pb->buf_ptr;
+		} else if (diff > 0) { // continued buffer
+			addFrame((char *) old_buf_ptr, diff);
+			old_buf_ptr = oc->pb->buf_ptr;
 		}
         iFrame++;
     }
-	printf("\n");
-	fclose(db); /*done!*/ 
 	
     /* write the trailer, if any. the trailer must be written
 * before you close the CodecContexts open when you wrote the
 * header; otherwise write_trailer may try to use memory that
 * was freed on av_codec_close() */
+
+	// NOTE TO GEORGE - NEEDS TO SEND TRAILER TO BE NICE :)
     //av_write_trailer(oc);
 
     /* close each codec */

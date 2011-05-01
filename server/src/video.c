@@ -109,12 +109,11 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
 		iPktSize= out_size;
         /* write the compressed frame in the media file */
 		if (av_interleaved_write_frame(oc, &pkt) != 0) {
-			fprintf(stderr, "Error while writing audio frame\n");
+			fprintf(stderr, "Error while writing video frame\n");
 			exit(1);
 		}
 	}
     frame_count++;
-    printf("Im here\n"); fflush(stdout);
  //   av_free(picture);
 }
 
