@@ -190,8 +190,8 @@ void write_audio_frame(AVFormatContext *oc, AVStream *st)
 
     c = st->codec;
 
-    //get_audio_frame(samples, audio_input_frame_size, c->channels);
-	get_mic_samples(samples, audio_input_frame_size);
+    get_audio_frame(samples, audio_input_frame_size, c->channels);
+	//get_mic_samples(samples, audio_input_frame_size);
 	
     pkt.size= avcodec_encode_audio(c, audio_outbuf, audio_outbuf_size, samples);
    // iPktSize=0;
