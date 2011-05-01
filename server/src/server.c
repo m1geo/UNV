@@ -162,7 +162,7 @@ and initialize the codecs */
 
 void cleanup() {
 	int i;
-	if (strcmp(cliOpts.mode, "LIVE")) {
+	if (strcmp(cliOpts.mode, "WEBCAM") == 0 ) {
 	// write trailer
     av_write_trailer(oc);
 	addFrame((char *) oc->pb->buffer, oc->pb->buf_ptr - oc->pb->buffer);	// send the trailer...
@@ -186,7 +186,7 @@ void cleanup() {
     }
     
     av_free(oc);
-	} else if (strcmp(cliOpts.mode, "FILE")) {
+	} else if (strcmp(cliOpts.mode, "FILE") == 0) {
 		fclose(infile);
 	}
 	printf("Clean exit, Champagne time\n");
@@ -212,7 +212,10 @@ int main(int argc, char *argv[]) {
 	sleep(10);	// allow client to connect before the server starts, so that client receives header!
 	
 	
-	if (strcmp(cliOpts.mode, "WEBCAM")) {
+	if (strcmp(cliOpts.mode, "FILE")==0) {
+		setup_file_source();
+	} else {
+		setup_webcam_source();
 		/* write the stream header, if any */
 		av_write_header(oc);
 		addFrame((char *) oc->pb->buffer, 552);	// send the header...
@@ -223,7 +226,7 @@ int main(int argc, char *argv[]) {
     for(;;) {
 		
 		printf("\rFrame %5ld", iFrame);
-        if(strcmp(cliOpts.mode, "FILE")) {
+        if(strcmp(cliOpts.mode, "FILE") == 0) {
 			if(send_packet_from_file(infile) == -1) break;
 		} else {
 			old_buf_ptr = send_live_packet(old_buf_ptr);
