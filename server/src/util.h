@@ -42,7 +42,7 @@
 #define min(a,b) ((a<=b)? a:b)
 
 
-#define STREAM_DURATION 	100.0
+#define STREAM_DURATION 	200.0
 #define STREAM_FRAME_RATE 	25
 #define STREAM_NB_FRAMES	((int) (STREAM_DURATION*STREAM_FRAME_RATE))
 #define STREAM_PIX_FMT		PIX_FMT_YUV420P
