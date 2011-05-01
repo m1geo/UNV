@@ -6,8 +6,10 @@
 
 
 
-#define INBUF_SIZE 4096
-#define AUDIO_INBUF_SIZE 20480
+#define INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
+
+#define AUDIO_INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
+
 #define AUDIO_REFILL_THRESH 4096
 
 #define SAMPLE_RATE 44100
@@ -20,7 +22,7 @@ AVFormatContext 	*pMicFormatContext;
 AVCodecContext		*pMicCodecContext;
 AVCodec				*pMicCodec;
 AVFrame				*pMicDec;		
-AVPacket			pWMicPacket;
+AVPacket			pMicPacket;
 int 				iAudioStream;
 
 
@@ -83,7 +85,7 @@ void open_microphone() {
 
 	temp = av_open_input_file(&pMicFormatContext, "plughw:0", pMicInputFormat, 0, &FormatParamAudDec);
 	if(temp !=0) {
-		printf("Couldn't open Microphone. Error code %d\n", temp);
+		printf("Couldn't open Microphone. Error code %d - %s\n", temp, AVERROR_LOOKUP(temp));
 		exit(EXIT_FAILURE);
 	}
 	
@@ -123,7 +125,7 @@ void open_microphone() {
 
  void open_audio(AVFormatContext *oc, AVStream *st)
 {
-	open_microphone();
+
     AVCodecContext *c;
     AVCodec *codec;
 
