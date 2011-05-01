@@ -23,7 +23,7 @@
 // define to return the minimum of two parameters; a,b
 #define min(a,b) ((a<=b)? a:b)
 
-#define STREAM_DURATION 	200.0 //
+#define STREAM_DURATION 	200.0 // NEEDS TO BE CONTINIOUS
 #define STREAM_FRAME_RATE 	25
 #define STREAM_NB_FRAMES	((int) (STREAM_DURATION*STREAM_FRAME_RATE))
 #define STREAM_PIX_FMT		PIX_FMT_YUV420P
@@ -55,26 +55,22 @@ extern int 					swsR_YUV;
 extern int					iPktSize;
 extern char					*filename;
 
-
-
-
-struct cliOpts_t 
-{	
+struct cliOpts_t {	
 	int     verbose;    // if ! false, show verbose messages
 	int     version;    // if ! false, show version message
 	int     formats;    // if ! false, show supported formats
-	int      saveframes;    // if ! false, save every <val>th frame to pmm
-	int      width;      // width of image, if non 0
+	int     saveframes;    // if ! false, save every <val>th frame to pmm
+	int     width;      // width of image, if non 0
 	int     height;      // height of image, if non 0
 	int     maxframes;    // only process <val> frames
-	int      CRASHOUT;    // DO NOT USE! DEVELOPMENT ONLY
-	int         saveaudio;      // TRUE if audiopath is defined (used to decide if to open file handles, etc)
-	int      savevideo;    // TRUE if videopath is defined (used to decide if to open file handles, etc)
-	int      networkport;  // Port for Network
-	char*    devicepath;      // path to file/device
-	char*    mode;      // mode for program
-	char*    videopath;    // Path for output video	
-	char*       audiopath;      // Path for output audio
+	int     CRASHOUT;    // DO NOT USE! DEVELOPMENT ONLY
+	int     saveaudio;      // TRUE if audiopath is defined (used to decide if to open file handles, etc)
+	int     savevideo;    // TRUE if videopath is defined (used to decide if to open file handles, etc)
+	int     networkport;  // Port for Network
+	char*   devicepath;      // path to file/device
+	char*   mode;      // mode for program
+	char*   videopath;    // Path for output video	
+	char*   audiopath;      // Path for output audio
 };
 
 AVFrame *alloc_picture(enum PixelFormat , int, int);
