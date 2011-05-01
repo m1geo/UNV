@@ -10,10 +10,14 @@
 
 #include <getopt.h>
 
+#include "cliOpts.h"
+
+#define UDP_OFFSET 1	// UDP Port = TCP Port + UDP_OFFSET
+
+const char * filename = "output.mkv";
+
 #define FALSE 0
 #define TRUE !FALSE
-
-const char *filename = "test.mkv";
 
 /* audio output */
 float t, tincr, tincr2;
@@ -49,17 +53,6 @@ static const struct option longOpts[] = {
 	{ "port",		required_argument,	NULL, 'p' },
 	{ "help",		no_argument, 		NULL, 'h' },
 	{ NULL,			no_argument, 		NULL, 0 }
-};
-
-struct cliOpts_t 
-{	
-	int     verbose;      // if ! false, show verbose messages
-	int     formats;      // if ! false, show supported formats
-	int     width;        // width of image, if non 0
-	int     height;       // height of image, if non 0
-	int     networkport;  // Port for Network
-	char*   url;          // path to file/device
-	char*   mode;         // mode for program
 };
 
 AVFrame *alloc_picture(enum PixelFormat pix_fmt, int width, int height)
@@ -323,7 +316,6 @@ void usage (char prog[]) {
 	printf("Options:\n");
 	
 	printOpts("v", "verbose", "Show messages during runtime");
-	printOpts("f", "formats", "Print supported formats for input");
 	printOpts("r", "resolution", "Camera open resolution [e.g. 640x480]");
 	printOpts("m", "mode", "\tMode [file or live]");
 	printOpts("u", "url", "\tPath to URL [file or camera path]");
@@ -341,25 +333,20 @@ int get_options (int c, char ** v) {
 	
 	/* Initialize cliOpts before we get to work. */
 	cliOpts.verbose		= FALSE;
-	cliOpts.formats		= FALSE;
 	cliOpts.width		= 640;	// default
 	cliOpts.height		= 480;	// default
-	cliOpts.url	= NULL;
+	cliOpts.url			= NULL;
 	cliOpts.mode		= NULL;
-	cliOpts.networkport = 0;	// not valid
-
-	/* Process the arguments with getopt_long(), then 
-	 * populate cliOpts. 
-	 */
+	cliOpts.udpport = 0;	// not valid
+	cliOpts.tcpport = 0;	// not valid
+	
+	// Process the arguments with getopt_long(), then populate cliOpts. 
+	
 	opt = getopt_long( c, v, optString, longOpts, &longIndex );
 	while( opt != -1 ) {
 		switch( opt ) {
 			case 'v':	// verbose
 				cliOpts.verbose++;
-				break;
-				
-			case 'f':	// formats
-				cliOpts.formats = TRUE;
 				break;
 				
 			case 'r':	// resolution
@@ -371,7 +358,7 @@ int get_options (int c, char ** v) {
 			case 'm':	// mode
 				if ( strlen(optarg) <= 0 ) {error=TRUE; break;}
 				cliOpts.mode = (char *) malloc(sizeof(char)*strlen(optarg));
-				for (i=0; i<(int)strlen(optarg)-1; i++) {
+				for (i=0; i<(int)strlen(optarg); i++) {
 					cliOpts.mode[i] = toupper(optarg[i]);
 				}
 				cliOpts.mode[i] = '\0';
@@ -379,7 +366,8 @@ int get_options (int c, char ** v) {
 				
 			case 'p':	// Network Port
 				if ( strlen(optarg) <= 0 ) {error=TRUE; break;}
-				cliOpts.networkport = atoi(optarg);
+				cliOpts.tcpport = atoi(optarg);
+				cliOpts.udpport = cliOpts.tcpport + UDP_OFFSET;
 				break;
 			
 			case 'u':	// url path
@@ -404,11 +392,10 @@ int get_options (int c, char ** v) {
 	if (cliOpts.verbose) {
 		printf("Command Line Options: (1=TRUE, 0=FALSE)\n");
 		printf("  Be Verbose:     %d\n", cliOpts.verbose);
-		printf("  Show Formats:   %d\n", cliOpts.formats);
 		printf("  Width:          %d\n", cliOpts.width);
 		printf("  Height:         %d\n", cliOpts.height);
 		printf("  URL:            %s\n", cliOpts.url);
-		printf("  Network Port:   %d\n", cliOpts.networkport);
+		printf("  Network Ports   %d TCP & %d UDP\n", cliOpts.tcpport, cliOpts.udpport);
 		printf("  Mode:           %s\n", cliOpts.mode);
 		printf("\n");
 	}

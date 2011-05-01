@@ -25,7 +25,6 @@ AVFrame				*pMicDec;
 AVPacket			pMicPacket;
 int 				iAudioStream;
 
-
 /*
  * add an audio output stream
  */
@@ -45,7 +44,6 @@ AVStream *add_audio_stream(AVFormatContext *oc, enum CodecID codec_id)
     c->codec_type = AVMEDIA_TYPE_AUDIO;
 
     /* put sample parameters */
-//    c->sample_fmt = AV_SAMPLE_FMT_S16;
     c->bit_rate = 64000;
     c->sample_rate = 44100;
     c->channels = 2;

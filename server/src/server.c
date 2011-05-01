@@ -51,7 +51,7 @@ int send_packet_from_file(FILE * inf) {
 
 unsigned char * send_live_packet(unsigned char * old_buf_ptr){
 	long int diff;
- if (audio_st)
+		if (audio_st)
             audio_pts = (double)audio_st->pts.val * audio_st->time_base.num / audio_st->time_base.den;
         else
             audio_pts = 0.0;
@@ -93,9 +93,9 @@ unsigned char * send_live_packet(unsigned char * old_buf_ptr){
 
 
 void setup_file_source() {
-	infile = fopen(cliOpts.devicepath, "rb");
+	infile = fopen(cliOpts.url, "rb");
 	if (infile == NULL) {
-		fprintf(stderr, "Couldn't open %s for reading\n", cliOpts.devicepath);
+		fprintf(stderr, "Couldn't open %s for reading\n", cliOpts.url);
 	}
 		
 }
@@ -162,7 +162,7 @@ and initialize the codecs */
 
 void cleanup() {
 	int i;
-	if (strcmp(cliOpts.mode, "WEBCAM") == 0 ) {
+	if (strcmp(cliOpts.mode, "LIVE") == 0 ) {
 	// write trailer
     av_write_trailer(oc);
 	addFrame((char *) oc->pb->buffer, oc->pb->buf_ptr - oc->pb->buffer);	// send the trailer...
@@ -205,10 +205,17 @@ int main(int argc, char *argv[]) {
 	if ( (argc<=1)||(get_options(argc, argv)) ) {
 		printf("Invalid or missing command line options.\n");
 		printf("Run %s --help for more information.\n\n", argv[0]);
-		exit(EXIT_SUCCESS);
+		exit(EXIT_FAILURE);
 	}
 	
-    startServerRTSP(20,30015,3015);
+	// check that mandatory command line args are there...
+	if ( (cliOpts.mode==NULL)||(cliOpts.url==NULL)||(cliOpts.tcpport==0)||(cliOpts.udpport==0) ) {
+		printf("mode, url, and port are mandatory options.\n");
+		printf("Run %s --help for more information.\n\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	
+    startServerRTSP(20,cliOpts.tcpport,cliOpts.udpport);
     printf("Waiting for 10 seconds for client to connect, before starting.\n");
 	sleep(10);	// allow client to connect before the server starts, so that client receives header!
 	
@@ -234,7 +241,6 @@ int main(int argc, char *argv[]) {
 			if (old_buf_ptr == NULL)
 			break;
 		}
-		
         iFrame++;
     }
 	

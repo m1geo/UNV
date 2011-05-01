@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "cliOpts.h"
 
 #ifndef INT64_C
 #define INT64_C(c) (c ## LL)
@@ -53,24 +54,6 @@ extern struct SwsContext	*swsC_YUV;
 extern int 					swsR_YUV;
 extern int					iPktSize;
 extern char					*filename;
-
-struct cliOpts_t {	
-	int     verbose;    // if ! false, show verbose messages
-	int     version;    // if ! false, show version message
-	int     formats;    // if ! false, show supported formats
-	int     saveframes;    // if ! false, save every <val>th frame to pmm
-	int     width;      // width of image, if non 0
-	int     height;      // height of image, if non 0
-	int     maxframes;    // only process <val> frames
-	int     CRASHOUT;    // DO NOT USE! DEVELOPMENT ONLY
-	int     saveaudio;      // TRUE if audiopath is defined (used to decide if to open file handles, etc)
-	int     savevideo;    // TRUE if videopath is defined (used to decide if to open file handles, etc)
-	int     networkport;  // Port for Network
-	char*   devicepath;      // path to file/device
-	char*   mode;      // mode for program
-	char*   videopath;    // Path for output video	
-	char*   audiopath;      // Path for output audio
-};
 
 AVFrame *alloc_picture(enum PixelFormat , int, int);
 char * AVERROR_LOOKUP(int );

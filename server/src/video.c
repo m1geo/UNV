@@ -127,7 +127,7 @@ void open_webcam()
 	
 	pWebcamInputFormat = av_find_input_format("video4linux2");
 
-	temp = av_open_input_file(&pWebcamFormatContext, "/dev/video0", pWebcamInputFormat, 0, NULL);
+	temp = av_open_input_file(&pWebcamFormatContext, cliOpts.url, pWebcamInputFormat, 0, NULL);
 	if(temp !=0) {
 		printf("Couldn't open webcam\n");
 		exit(EXIT_FAILURE);
