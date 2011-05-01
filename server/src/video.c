@@ -54,11 +54,9 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
 
     c = st->codec;
 
-    if (frame_count >= STREAM_NB_FRAMES) {
         /* no more frame to compress. The codec has a latency of a few
            frames if using B frames, so we get the last frames by
            passing the same picture again */
-    } else {
         if (c->pix_fmt != pWebcamCodecContext->pix_fmt) {  
             /* as we only generate a YUV420P picture, we must convert it
                to the codec pixel format if needed */
@@ -78,7 +76,6 @@ void write_video_frame(AVFormatContext *oc, AVStream *st)
         } else {
             picture=get_webcam_frame();
         }
-    }
     
     /* encode the image */
     out_size = avcodec_encode_video(c, video_outbuf, video_outbuf_size, picture);

@@ -61,8 +61,8 @@ unsigned char * send_live_packet(unsigned char * old_buf_ptr){
         else
             video_pts = 0.0;
 
-        if ((!audio_st || audio_pts >= STREAM_DURATION) &&
-            (!video_st || video_pts >= STREAM_DURATION))
+        if ((!audio_st) &&
+            (!video_st))
             return(NULL);
 
         /* write interleaved audio and video frames */
