@@ -43,10 +43,10 @@ int iLastIFrameSize;
 int tStamp;
 //Define constants
 #define BUFFSIZE 100000
-int UDP_PORT;// = 3015;
-int TCP_PORT;// = 30015;
+int UDP_PORT = 0;// = 3015;
+int TCP_PORT = 0;// = 30015;
 char* SERVER_ADDRESS;// = "127.0.0.1";
-#define FILE_NAME "out2.mkv"
+#define FILE_NAME "client_output.mkv"
 
 //Open output file stream for write
 //ofstream fFile (FILE_NAME, ios::out | ios::binary);
@@ -392,37 +392,30 @@ void tryStartSocket(){
 	    cerr<<" Client started"<<endl;
 	}
 	//catch exception
-        catch ( SocketException& ) {
+    catch ( SocketException& ) {
 	    usleep(1000000);
 	    cerr<<".";
 	    tryStartSocket();
-        }
+    }
 }
 
 //main function - where it all starts
 int main(int argc, char *argv[])
 {
-	if(argc <2){
-		UDP_PORT = 3015;
-		TCP_PORT = 30015;
-		SERVER_ADDRESS = (char*)"127.0.0.1";
-		cerr<<"Using predefined host, TCP ports and UDP ports."<<endl;
-	}else if(argc == 4){
-		SERVER_ADDRESS = (char*)argv[1];
-		UDP_PORT = (int)argv[2];
-		TCP_PORT = (int)argv[3];
-		cerr<<"Using custom host, TCP ports and UDP ports."<<endl;
-	}else if(argc == 3){
-		SERVER_ADDRESS = (char*)argv[1];
-		UDP_PORT = (int)argv[2];
-		TCP_PORT = 30015;
-		cerr<<"Using custom host and UDP ports, using predefined TCP ports."<<endl;
-	}else if(argc == 2){
-		SERVER_ADDRESS = (char*)argv[1];
-		UDP_PORT = 3015;
-		TCP_PORT = 30015;
-		cerr<<"Using custom host, and predefined TCP ports and UDP ports."<<endl;
+	cerr << "The UNV Project - Client" << endl;
+	cerr << "Department of Electronic & Electrical Engineering" << endl;
+	cerr << "University College London" << endl << endl;
+
+	if (argc != 3) {
+		cerr << "Usage: " << endl << "\t" << argv[0] << " [address] [tcp port]" << endl;
+		exit(EXIT_FAILURE);
 	}
+	
+	SERVER_ADDRESS = argv[1];
+	TCP_PORT = atoi(argv[2]);
+	UDP_PORT = TCP_PORT + 1;
+	
+	cerr << "Connecting to '" << SERVER_ADDRESS << "' on tcp" << TCP_PORT << "/udp" << UDP_PORT << endl;
 	
 	cerr<<"Starting Client.";
 	tryStartSocket();

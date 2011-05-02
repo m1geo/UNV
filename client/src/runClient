@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Launcher Starting... Please wait."
+./exec/Client $* | ./exec/Player -
