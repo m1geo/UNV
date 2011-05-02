@@ -212,19 +212,15 @@ void setupUDP(int iUDP_Port)
 	if (bind(iUDP_Sock, (struct sockaddr *) &sockUDP_Server, sizeof(sockUDP_Server)) < 0) {
 		Die("Failed to bind server socket");
 	}
-	cout << "POS 1" << endl;
 	// Receive welcome message from the client     
 	iReceived = recvfrom(iUDP_Sock, cUDP_RcvWelcomeBuffer, sizeof(cUDP_RcvWelcomeBuffer), 0, (struct sockaddr *) &structUDP_Client, &iClientSize);
 	//If failed to recieve welcome message display error and die
 	if (iReceived < 0){
 		Die("Failed to receive message");
 	}
-	cout << "POS 2" << endl;
 	//Send client IP address and message to screen
 	cout << "Client connected: " << inet_ntoa(structUDP_Client.sin_addr) << endl;
-	cout << "POS 3" << endl;
 	cout << "Client: " << cUDP_RcvWelcomeBuffer << endl;
-	cout << "POS 4" << endl;
 }
 
 //Function to prevent a thread dying
