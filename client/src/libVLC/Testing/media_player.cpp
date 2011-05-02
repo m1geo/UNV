@@ -11,7 +11,7 @@ int main(int argc,char *argv[])
     {
         cerr << "You must pass two arguments! " << endl;
         cerr << "The first argument is the filename and the second one is the mode: \n" << endl;
-        cerr << "0 for offline mode and 1 for offline mode" << endl;
+        cerr << "0 for online mode and 1 for offline mode" << endl;
         exit(1);
     }
 

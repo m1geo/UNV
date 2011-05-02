@@ -14,7 +14,7 @@
 
 #define UDP_OFFSET 1	// UDP Port = TCP Port + UDP_OFFSET
 
-const char * filename = "output.mkv";
+const char * filename = "server_output.mkv";
 
 #define FALSE 0
 #define TRUE !FALSE

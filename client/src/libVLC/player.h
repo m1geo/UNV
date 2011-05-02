@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include "flowcontrol.h"
 #include "sv.h"
+#include "sharedfile.h"
 
 using namespace std;
 int playoutPoint;
@@ -18,6 +19,10 @@ int media_player(char* mediafile, int x)
 {
     int t_sampling = 150;
     int m_state;
+
+    string path = "snapshots/";
+    path += playoutPoint;
+    path += ".png";
 
     struct timeval start, sp, end;
     long tr, tp, seconds = 0, useconds = 0, s1 = 0, u1 = 0, seconds_p = 0, useconds_p = 0;
@@ -58,13 +63,8 @@ int media_player(char* mediafile, int x)
     /* Finding playout point and writing to file while playing */
     //int lm = libvlc_media_player_get_length (mp); /* Finding the length of the video */
     playoutPoint = libvlc_media_player_get_time (mp);
-    
-    remove("Data.txt");
-    File.open("Data.txt", ios::out);
-    
-    char str[256];
 
-    while(offline)
+    while(offline && sharedread("Data_Client_Signals").compare("3") != 0)
     {
         if (kbhit() && (getchar() == 'p'))
         {
@@ -82,6 +82,7 @@ int media_player(char* mediafile, int x)
         }
 	
 	    usleep (t_sampling * 1000); /* Let it play a bit */
+	    //libvlc_video_take_snapshot(mp,0,path.c_str(),640,480);
 	    gettimeofday(&end, NULL);
 
 	    if(m_state == 3)
@@ -94,15 +95,10 @@ int media_player(char* mediafile, int x)
 	    }
 	    cout<< "At time "<< tr << " ms, video played "<<playoutPoint <<"ms, state ="<< m_state << endl;
 	
-	    File.close();
-	    File.open("Data.txt", ios::out);
-	    File<< playoutPoint << endl;
-
+	    sharedwrite("Data_playout", playoutPoint);
 
 	    playoutPoint = libvlc_media_player_get_time (mp);
-        m_state = libvlc_media_player_get_state (mp);
-	    
-     	sprintf(str, "Playout Point: %d ms", (int)playoutPoint);           
+            m_state = libvlc_media_player_get_state (mp);         
 	
 	    if(m_state == 6)
 	    {
@@ -110,14 +106,15 @@ int media_player(char* mediafile, int x)
 	    }	
     }
 
-    while(!offline)
+    while(!offline && sharedread("Data_Client_Signals").compare("3") != 0 && sharedread("Data_Client_Signals").compare("0") != 0)
     {
         m_state = libvlc_media_player_get_state (mp);
         
         if(m_state == 3)
         {
             usleep (t_sampling * 1000);
-	        gettimeofday(&end, NULL);
+	    //libvlc_video_take_snapshot(mp,0,path.c_str(),640,480);
+	    gettimeofday(&end, NULL);
             
             seconds  = end.tv_sec  - start.tv_sec + s1;
             useconds = end.tv_usec - start.tv_usec + u1;
@@ -127,17 +124,13 @@ int media_player(char* mediafile, int x)
             seconds_p  = end.tv_sec  - sp.tv_sec;
             useconds_p = end.tv_usec - sp.tv_usec;
 	
-	        tp = ((seconds_p) * 1000 + useconds_p/1000.0) + 0.5;
-	        cout << "At time "<< tr << " ms, video played "<< tp <<"ms, state ="<< m_state << endl;
-            
-            sprintf(str, "Playout Point: %d ms", (int)tp);           
+	    tp = ((seconds_p) * 1000 + useconds_p/1000.0) + 0.5;
+	    playoutPoint = (int)tp;
+	    cout << "At time "<< tr << " ms, video played "<< playoutPoint <<"ms, state ="<< m_state << endl;       
         }
-
-	    File.close();
-	    File.open("Data.txt", ios::out);
-	    File<< tp << endl;
+	sharedwrite("Data_playout", playoutPoint);
 	
-	    if(m_state == 6)
+	if(m_state == 6)
     	{
 	        break;
     	}

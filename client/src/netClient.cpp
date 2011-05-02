@@ -24,6 +24,8 @@
 #include <netinet/in.h>
 #include <fstream>
 #include "RTPpacket.h"
+#include "libVLC/sharedfile.h"
+#include "libVLC/sv.h"
 
 //Use standard name space
 using namespace std;
@@ -38,22 +40,26 @@ concurrent_queue<int> qBuffQueueSize;
 char * pLastIFrame;
 int iLastIFrameSize;
 
+int tStamp;
 //Define constants
 #define BUFFSIZE 100000
-#define UDP_PORT 3015
-#define TCP_PORT 30015
-#define SERVER_ADDRESS "127.0.0.1"
+int UDP_PORT;// = 3015;
+int TCP_PORT;// = 30015;
+char* SERVER_ADDRESS;// = "127.0.0.1";
 #define FILE_NAME "out2.mkv"
 
+//Open output file stream for write
+//ofstream fFile (FILE_NAME, ios::out | ios::binary);
+
 //Initialise TCP client socket
-ClientSocket objTCP_Socket ( SERVER_ADDRESS, TCP_PORT );
+ClientSocket objTCP_Socket;
 
 //Define UDP Socket Global Variables
 int iUDP_Sock;
 struct sockaddr_in structUDP_Server;
 
 //Include Hans VLC functions
-#include "libVLC/player.h"
+//#include "libVLC/player.h"
 
 //Function to display error on screen and exit
 void Die(string errMsg) 
@@ -67,7 +73,7 @@ void signalToServer(void);
 //Function to run VLC with saved file
 void runVLC()
 {
-	media_player((char*)stdout,1);
+	//player((char*)stdout,1);
 }//END runVLC function
 
 //Function to add video frame to the queue
@@ -90,7 +96,6 @@ void addFrame(char* pFrameIn, int iFrameSize)
 //Function to write frames in queue to file
 void writeToFile()
 {
-	//Open output file stream for write
 	ofstream fFile (FILE_NAME, ios::out | ios::binary);
 
 	//Declare Byte Array pointer and integer to hold frame data
@@ -197,8 +202,9 @@ void startClientUDP()
 			//place the retrieved RTP Payload in its byte array
 			objRTP_Packet.getpayload(cRTP_Payload);
 
+			tStamp = objRTP_Packet.gettimestamp();
 			//Send information about the RTP packet to screen
-			cerr << "Got RTP packet with SeqNum # " << objRTP_Packet.getsequencenumber() << " TimeStamp " << objRTP_Packet.gettimestamp() << " ms, of type " << objRTP_Packet.getpayloadtype() << " and size " << iRTP_PacketSize << " bytes" << endl;
+			cerr << "Got RTP packet with SeqNum # " << objRTP_Packet.getsequencenumber() << " TimeStamp " << tStamp << " ms, of type " << objRTP_Packet.getpayloadtype() << " and size " << iRTP_PacketSize << " bytes" << endl;
 
 			//If I-Frame set it to lastIFrame pointer
 			if(iRTP_PacketSize > 7500)
@@ -218,11 +224,11 @@ void startClientUDP()
 		   	}
 			    
 			//Add the video frame to queue
-			addFrame(cRTP_Payload, iRTP_PacketSize);
+			//addFrame(cRTP_Payload, iRTP_PacketSize);
+			//fFile.write(cRTP_Payload, iRTP_PacketSize);
+			//fFile.flush();			
 
-			//Once 20 packets have been received start VLC
-			
-			int p = 5;	    	
+			int p = 20;	    	
 			if((iPacketNo % p) == (p - 1))
 			{
 				//VLC Status Vector
@@ -301,7 +307,16 @@ void startClientRTSP()
 
               //send keyboard input via TCP to server
               objTCP_Socket << sKeyboardInput;
-
+		
+		//Hans: Client communicates to Player here
+		if(sKeyboardInput.compare("s") == 0)
+		{
+			sharedwrite("Data_Client_Signals", 0);
+		}
+		else if(sKeyboardInput.compare("p") == 0)
+		{
+			sharedwrite("Data_Client_Signals", 1);
+		}
         	  //get server response
               objTCP_Socket >> sReply;
           }
@@ -311,6 +326,7 @@ void startClientRTSP()
           //If keyboard input was "QUIT"
           if(sKeyboardInput.compare("QUIT") == 0)
           {
+		sharedwrite("Data_Client_Signals", 3);
         	  //Tell the screen that we are quitting
         	  cerr << "Quitting";
 
@@ -354,27 +370,65 @@ void signalToServer()
     string sReply;
 
     //Stelios catch signal stuff here
-    string playoutPoint;
-    
-    ifstream file ("Data.txt");
-    if (file.is_open() && file.good())
-    {
-    	getline (file,playoutPoint);
-	
-	//send signal via TCP to server
-    	objTCP_Socket << playoutPoint;
-    }
-    file.close();
+    stringstream tStampString;
+    tStampString << tStamp;
+
+    string msg = "< ";
+    msg += tStampString.str();
+    msg += ",";
+    msg += sharedread("Data_playout");
+    msg += " >";
+
+    objTCP_Socket << msg;
 
     //get server response
     objTCP_Socket >> sReply;
     cerr << "We received this response from the server:\n\"" << sReply << endl;
 }
 
+void tryStartSocket(){
+	try{
+	    objTCP_Socket.start( SERVER_ADDRESS, TCP_PORT );
+	    cerr<<" Client started"<<endl;
+	}
+	//catch exception
+        catch ( SocketException& ) {
+	    usleep(1000000);
+	    cerr<<".";
+	    tryStartSocket();
+        }
+}
+
 //main function - where it all starts
-int main() 
-{    	
-	remove("Data.txt");
+int main(int argc, char *argv[])
+{
+	if(argc <2){
+		UDP_PORT = 3015;
+		TCP_PORT = 30015;
+		SERVER_ADDRESS = (char*)"127.0.0.1";
+		cerr<<"Using predefined host, TCP ports and UDP ports."<<endl;
+	}else if(argc == 4){
+		SERVER_ADDRESS = (char*)argv[1];
+		UDP_PORT = (int)argv[2];
+		TCP_PORT = (int)argv[3];
+		cerr<<"Using custom host, TCP ports and UDP ports."<<endl;
+	}else if(argc == 3){
+		SERVER_ADDRESS = (char*)argv[1];
+		UDP_PORT = (int)argv[2];
+		TCP_PORT = 30015;
+		cerr<<"Using custom host and UDP ports, using predefined TCP ports."<<endl;
+	}else if(argc == 2){
+		SERVER_ADDRESS = (char*)argv[1];
+		UDP_PORT = 3015;
+		TCP_PORT = 30015;
+		cerr<<"Using custom host, and predefined TCP ports and UDP ports."<<endl;
+	}
+	
+	cerr<<"Starting Client.";
+	tryStartSocket();
+
+	deleteshared("Data_playout");
+	sharedwrite("Data_Client_Signals", 1);
 	//run the startClientRTSP function
 	startClientRTSP();
 

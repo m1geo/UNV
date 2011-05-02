@@ -1,3 +1,0 @@
-#!/bin/bash
-echo "UNV Player, E&EE, UCL"
-./exec/client | ./exec/player -
