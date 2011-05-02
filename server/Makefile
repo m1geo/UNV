@@ -12,8 +12,8 @@ CPP=cpp
 CC=gcc
 CPPC=g++
 CPPFLAGS ?= -g
-CFLAGS=-c
-CPPFLAGS += -Wall 
+CFLAGS=-c -g
+CPPFLAGS += -Wall  -g
 STDFLAGS += "-std=gnu99"
 
 COMPILE = $(CPPC) $(CPPFLAGS) -c

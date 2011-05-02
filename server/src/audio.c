@@ -4,18 +4,10 @@
 #include <libswscale/swscale.h>
 #include "util.h"
 
-
-
-#define INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
-
-#define AUDIO_INBUF_SIZE AVCODEC_MAX_AUDIO_FRAME_SIZE
-
-#define AUDIO_REFILL_THRESH 4096
-
 #define SAMPLE_RATE 44100
-#define BITRATE 256000
+#define BITRATE 64000
 #define CHANNELS 2
-#define SIZE 2
+
 
 
 AVFormatContext 	*pMicFormatContext;
@@ -24,6 +16,16 @@ AVCodec				*pMicCodec;
 AVFrame				*pMicDec;		
 AVPacket			pMicPacket;
 int 				iAudioStream;
+
+int16_t 			*AudBuffer;
+int16_t 			*pAudBufCurr;
+int16_t			*pAudBufFirst;
+long int			iAudBufSize;
+int test=0;
+
+
+
+
 
 /*
  * add an audio output stream
@@ -44,6 +46,7 @@ AVStream *add_audio_stream(AVFormatContext *oc, enum CodecID codec_id)
     c->codec_type = AVMEDIA_TYPE_AUDIO;
 
     /* put sample parameters */
+   // c->sample_fmt = AV_SAMPLE_FMT_S16;
     c->bit_rate = 64000;
     c->sample_rate = 44100;
     c->channels = 2;
@@ -61,7 +64,7 @@ void get_audio_frame(int16_t *samples, int frame_size, int nb_channels)
 
     q = samples;
     for(j=0;j<frame_size;j++) {
-        v = (int)(sin(t) * 10000);
+        v = (int)(sin(t) * 100000);
         for(i = 0; i < nb_channels; i++)
             *q++ = v;
         t += tincr;
@@ -148,7 +151,7 @@ void open_microphone() {
     /* increment frequency by 110 Hz per second */
     tincr2 = 2 * M_PI * 110.0 / c->sample_rate / c->sample_rate;
 
-    audio_outbuf_size = 10000;
+    audio_outbuf_size = AVCODEC_MAX_AUDIO_FRAME_SIZE;
     audio_outbuf = (uint8_t*)av_malloc(audio_outbuf_size);
 
     /* ugly hack for PCM codecs (will be removed ASAP with new PCM
@@ -168,14 +171,32 @@ void open_microphone() {
     } else {
         audio_input_frame_size = c->frame_size;
     }
+    audio_input_frame_size =AVCODEC_MAX_AUDIO_FRAME_SIZE+FF_INPUT_BUFFER_PADDING_SIZE; // good Measure
+    iAudBufSize = audio_input_frame_size*5*c->channels;
+    AudBuffer = (int16_t*)av_malloc(iAudBufSize * sizeof(uint16_t));
+    pAudBufCurr = AudBuffer;
+    pAudBufFirst = AudBuffer;
     samples = (int16_t*)av_malloc(audio_input_frame_size * 2 * c->channels);
 }
 
-void get_mic_samples(int16_t *sample, int size) {
+int get_mic_samples() {
 	int len;
+	int x;
+	x = audio_input_frame_size;
 	AVPacket pkt;
-	av_read_frame(pMicFormatContext, &pkt);
-	len =  avcodec_decode_audio3(pMicCodecContext, sample, &size, &pkt);
+	av_init_packet(&pkt);
+	len = av_read_frame(pMicFormatContext, &pkt);
+	
+	if (len != 0) {
+		fprintf(stderr, "Couldn't get packet to process, returned %d - %s\n",len,AVERROR_LOOKUP(len));
+		exit(EXIT_FAILURE);
+	}
+	do
+	{
+	len =  avcodec_decode_audio3(pMicCodecContext, pAudBufCurr, &x, &pkt);
+	} while (!x);
+	
+	return(len);
 }
 
 
@@ -185,17 +206,51 @@ void write_audio_frame(AVFormatContext *oc, AVStream *st)
     AVCodecContext *c;
     AVPacket pkt;
     av_init_packet(&pkt);
-
+	int len;
     c = st->codec;
 
-    get_audio_frame(samples, audio_input_frame_size, c->channels);
-	//get_mic_samples(samples, audio_input_frame_size);
+	//~ 
+    //~ if (pAudBufCurr == pAudBufFirst) {
+	//~ //	printf("Out of samples\n");
+		//~ while(pAudBufCurr < (AudBuffer + iAudBufSize - audio_input_frame_size)) {
+			//~ //Fill Buffer
+			//~ /* Run out of samples get some (buffer full) */
+			//~ //get_audio_frame(pAudBufCurr, audio_input_frame_size, c->channels);
+			//~ len =get_mic_samples();
+			//~ //len = audio_input_frame_size;
+			//~ if (len <= 0) {
+				//~ break;
+			//~ }  else {
+				//~ pAudBufCurr+=len;
+			//~ }
+		//~ }
+		//~ if (pAudBufCurr >= (AudBuffer + iAudBufSize - audio_input_frame_size)){
+			//~ printf("Resetting pointer\n");
+			//~ pAudBufCurr= AudBuffer;
+			//~ t = 0;
+			//~ tincr = 2 * M_PI * 110.0 / c->sample_rate;
+			//~ /* increment frequency by 110 Hz per second */
+			//~ tincr2 = 2 * M_PI * 110.0 / c->sample_rate / c->sample_rate;
+		//~ }
+	//~ }
+	//~ 
+
+	get_mic_samples();
+	//audio_input_frame_size =100000;
+	//get_audio_frame(pAudBufCurr, audio_input_frame_size, c->channels);
 	
-    pkt.size= avcodec_encode_audio(c, audio_outbuf, audio_outbuf_size, samples);
+    pkt.size= avcodec_encode_audio(c, audio_outbuf, audio_outbuf_size, pAudBufFirst);
+   //~ pAudBufFirst += audio_input_frame_size;
+    //~ if (pAudBufFirst >= (AudBuffer + iAudBufSize - audio_input_frame_size)) {
+		//~ pAudBufFirst = AudBuffer;
+	//~ }
    // iPktSize=0;
 	iPktSize= pkt.size;
-    if (c->coded_frame && c->coded_frame->pts != (int)AV_NOPTS_VALUE)
+	
+    if (c->coded_frame && c->coded_frame->pts != (int)AV_NOPTS_VALUE) {
         pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, st->time_base);
+
+	}
     pkt.flags |= AV_PKT_FLAG_KEY;
     pkt.stream_index= st->index;
     pkt.data= audio_outbuf;
@@ -205,6 +260,7 @@ void write_audio_frame(AVFormatContext *oc, AVStream *st)
         fprintf(stderr, "Error while writing audio frame\n");
         exit(1);
     }
+    
 }
 
 void close_audio(AVFormatContext *oc, AVStream *st)

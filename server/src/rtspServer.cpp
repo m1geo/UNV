@@ -143,7 +143,7 @@ void sendRTP_Packet(const char * pVideoFrame, int iVideoFrameSize)
 	iSent = sendto(iUDP_Sock, pRTP_Packet, iRTP_PacketSize, 0, (struct sockaddr *) &structUDP_Client, sizeof(structUDP_Client));
 	
 	//Give the screen an update
-	cout << "Pkt " << iPacketNo << ", Size " << iSent << "b Queue " << qBuffQueue.size() << endl;
+	//cout << "Pkt " << iPacketNo << ", Size " << iSent << "b Queue " << qBuffQueue.size() << endl;
 }
 
 void startUDP()

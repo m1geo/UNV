@@ -40,8 +40,8 @@ int iLastIFrameSize;
 
 //Define constants
 #define BUFFSIZE 100000
-#define UDP_PORT 3015
-#define TCP_PORT 30015
+#define UDP_PORT 1235
+#define TCP_PORT 1234
 #define SERVER_ADDRESS "127.0.0.1"
 #define FILE_NAME "out2.mkv"
 

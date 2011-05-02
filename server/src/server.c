@@ -38,14 +38,15 @@ int send_packet_from_file(FILE * inf) {
 	char * buffer;
 	int size;
 	int len;
-	size = 12 * 1e3;
+	size = 1 * 1e3;
 	
 	buffer = malloc(size * sizeof(char));
 	len = fread(buffer, 1, size, inf);
-	addFrame(buffer, size);
+	addFrame(buffer, len);
 	if (feof(inf)) {
 		len = -1;
 	}
+	usleep(10000);
 	return(len);
 }
 
@@ -110,7 +111,7 @@ void setup_webcam_source() {
         fprintf(stderr, "Could not find suitable output format\n");
         exit(1);
     }
-
+	open_microphone(); 
     /* allocate the output media context */
     oc = avformat_alloc_context();
     if (!oc) {
@@ -127,6 +128,7 @@ and initialize the codecs */
     if (fmt->video_codec != CODEC_ID_NONE) {
         video_st = add_video_stream(oc, fmt->video_codec);
     }
+    
     if (fmt->audio_codec != CODEC_ID_NONE) {
         audio_st = add_audio_stream(oc, fmt->audio_codec);
     }
@@ -141,7 +143,7 @@ and initialize the codecs */
 
     /* now that all the parameters are set, we can open the audio and
 	video codecs and allocate the necessary encode buffers */
-       
+     
     open_webcam();
     
     if (video_st)
@@ -214,7 +216,7 @@ int main(int argc, char *argv[]) {
 		printf("Run %s --help for more information.\n\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	
+
     startServerRTSP(20,cliOpts.tcpport,cliOpts.udpport);
     printf("Waiting for 10 seconds for client to connect, before starting.\n");
 	sleep(10);	// allow client to connect before the server starts, so that client receives header!

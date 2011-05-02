@@ -25,7 +25,7 @@
 #define min(a,b) ((a<=b)? a:b)
 
 
-#define STREAM_FRAME_RATE 	25
+#define STREAM_FRAME_RATE 	15
 #define STREAM_PIX_FMT		PIX_FMT_YUV420P
 
 #undef exit
