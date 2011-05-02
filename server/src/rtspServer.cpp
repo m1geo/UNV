@@ -195,7 +195,7 @@ void setupUDP(int iUDP_Port)
     int iReceived = 0;
 
 	//Tell screen UDP session starting
-    cout << "Starting UDP" << endl;
+    cout << "Starting UDP at "<< iUDP_Port << endl;
 
     // Create the UDP socket
 	if ((iUDP_Sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -212,17 +212,19 @@ void setupUDP(int iUDP_Port)
 	if (bind(iUDP_Sock, (struct sockaddr *) &sockUDP_Server, sizeof(sockUDP_Server)) < 0) {
 		Die("Failed to bind server socket");
 	}
-
+	cout << "POS 1" << endl;
 	// Receive welcome message from the client     
 	iReceived = recvfrom(iUDP_Sock, cUDP_RcvWelcomeBuffer, sizeof(cUDP_RcvWelcomeBuffer), 0, (struct sockaddr *) &structUDP_Client, &iClientSize);
 	//If failed to recieve welcome message display error and die
 	if (iReceived < 0){
 		Die("Failed to receive message");
 	}
-
+	cout << "POS 2" << endl;
 	//Send client IP address and message to screen
 	cout << "Client connected: " << inet_ntoa(structUDP_Client.sin_addr) << endl;
+	cout << "POS 3" << endl;
 	cout << "Client: " << cUDP_RcvWelcomeBuffer << endl;
+	cout << "POS 4" << endl;
 }
 
 //Function to prevent a thread dying
@@ -235,7 +237,7 @@ void dontDie()
 
 void threadStartServerRTSP(int iQueueMinSize, int iTCP_Port,int iSetUDP)
 {	
-	cout << "RTSP Server running on port... \n";
+	cout << "RTSP Server running on port " << iTCP_Port << "/" << iSetUDP << endl;
 	try 
     {
 		// Create the initial socket with the TCP port number
@@ -303,7 +305,7 @@ void threadStartServerRTSP(int iQueueMinSize, int iTCP_Port,int iSetUDP)
 		}//END while loop 1 - (socket accept loop)
 	}
 	//catch exception
-	catch ( SocketException& e ) { cout << "Exception was caught:" << e.description() << "\nExiting.\n"; }
+	catch ( SocketException& e ) { cout << "E:" << e.description() << "\nExiting.\n"; }
 }
 
 //Role of this function is to simply start function threadStartServerRTSP in a new thread

@@ -10,7 +10,7 @@
 #include "util.h"
 
 #ifndef UNVVIDEO
-#define UNVVIDEO 
+#define UNVVIDEO
 
 /* General Global Variables */
 extern AVFormatContext		*pWebcamFormatContext;
