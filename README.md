@@ -12,22 +12,26 @@ Supported Features:
 Copyright
 =========
 The UNV Project
+
 Department of Electronic & Electrical Engineering
+
 University College London
+
 http://www.ee.ucl.ac.uk/
+
 
 Friday, 14th October 2011.
 
 		
 Project Authors
 ===============
-George Smart		g.smart@ee.ucl.ac.uk (lead developer)
-Grigorios Stathis	uceegrs@ee.ucl.ac.uk
-Obada Sawalha		o.sawalha@ee.ucl.ac.uk
-Lorenzo Levrini		l.levrini@ee.ucl.ac.uk
-Stelios Vitorakis	s.vitorakis@ee.ucl.ac.uk
-Hans Balgobin		h.balgobin@ee.ucl.ac.uk
-Yiannis Andreopoulos	i.andreop@ee.ucl.ac.uk (supervisor)
+- George Smart		g.smart@ee.ucl.ac.uk (lead developer)
+- Grigorios Stathis	uceegrs@ee.ucl.ac.uk
+- Obada Sawalha		o.sawalha@ee.ucl.ac.uk
+- Lorenzo Levrini		l.levrini@ee.ucl.ac.uk
+- Stelios Vitorakis	s.vitorakis@ee.ucl.ac.uk
+- Hans Balgobin		h.balgobin@ee.ucl.ac.uk
+- Yiannis Andreopoulos	i.andreop@ee.ucl.ac.uk (supervisor)
 
 
 Important
@@ -57,26 +61,20 @@ distributed under it's respective licence.
 
 Dependencies
 ============
-This program depends on the following libraries
-	libboost-dev
-	libboost-thread-dev
-	libavcodec-dev
-	libavformat-dev
-	libavdevice-dev
-	libavutil-dev
-	libswscale-extra* (must be extra)
-	libavcodec-extra* (must be extra)
-	libvlc-dev
-	build-essentials
-	ffmpeg
-	vlc
-	g++
-
-Open a terminal window and type:
-	sudo apt-get install g++ build-essential libboost-dev \
-	  libboost-thread-dev libav{codec,format,device,util}-dev \
-	  libav{codec,format,device,util}-extra* libswscale-dev libvlc-dev \
-	  vlc ffmpeg
+This program depends on the following libraries:
+- libboost-dev
+- libboost-thread-dev
+- libavcodec-dev
+- libavformat-dev
+- libavdevice-dev
+- libavutil-dev
+- libswscale-extra* (must be extra)
+- libavcodec-extra* (must be extra)
+- libvlc-dev
+- build-essentials
+- ffmpeg
+- vlc
+- g++
 
 
 Compiling
@@ -88,10 +86,10 @@ applications.
 
 Once you have the dependencies met, simply open a terminal window and go to 
 folder ./Client and type:
-	make
+	`make`
 
 Then go to folder ./Server and type:
-	make 
+	`make`
 
 
 Precompiled Binaries
@@ -100,9 +98,9 @@ Should you have a problem compiling the server or client applications,
 precompiled 32-bit binaries can be found inside the Server and Client folders.
 These were compiled on under Ubuntu 11.04, Natty, with GCC 4.5.2-8ubuntu4.
 
-	Server/Server
-	Client/runClient
-	Client/exec/Client
+- Server/Server
+- Client/runClient
+- Client/exec/Client
 
 
 Running
@@ -112,23 +110,23 @@ running each without arguments or with the "--help" flag for specific details.
 
 Example: running the streaming session on localhost
 
-1)	Find your webcam's device node, typically /dev/video0
+1. Find your webcam's device node, typically `/dev/video0`
 
-2)	Open a terminal, and run the server by:
-	./Server -m v4l -d /dev/video0 -p 9999 -t UDP -c H264
+2. Open a terminal, and run the server by: 
+    `./Server -m v4l -d /dev/video0 -p 9999 -t UDP -c H264`
 
-3)	Open another terminal, and run the client by:
-	./runClient localhost 9999 UDP H264
+3. Open another terminal, and run the client by: 
+    `./runClient localhost 9999 UDP H264`
+    
+    Notice that the client has specific syntax, i.e.: 
+    `./runClient <ipaddress> <port_no> <UDP or TCP> <H264 or MJPEG>`
+    
+4. Once both are launched, type: 
+    `SETUP`
+    
+    in the client window, followed by: 
+    `PLAY`
 
-	Notice that the client has specific syntax, i.e.:
-	./runClient <ipaddress> <port_no> <UDP or TCP> <H264 or MJPEG>
-
-4)	Once both are launched, type: 
-	SETUP
-   
-	in the client window, followed by 
-	PLAY
-
-5)	To stop the streaming, just press CTRL+C in the Server window, which is 
-	explicitly captured by the server, freeing codecs and memory. 
+5. To stop the streaming, just press CTRL+C in the Server window, which is 
+    explicitly captured by the server, freeing codecs and memory. 
 
