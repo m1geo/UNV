@@ -1,0 +1,35 @@
+Copyright 2011:
+	The UNV Project
+	Department of Electronic & Electrical Engineering
+	University College London
+
+	http:www.ee.ucl.ac.uk/
+		
+Project Authors:
+	George Smart		g.smart@ee.ucl.ac.uk (lead developer)
+	Grigorios Stathis	uceegrs@ee.ucl.ac.uk
+	Obada Sawalha		o.sawalha@ee.ucl.ac.uk
+	Lorenzo Levrini		l.levrini@ee.ucl.ac.uk
+	Stelios Vitorakis	s.vitorakis@ee.ucl.ac.uk
+	Hans Balgobin		h.balgobin@ee.ucl.ac.uk
+	Yiannis Andreopoulos	i.andreop@ee.ucl.ac.uk (supervisor)
+			
+Licence:
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA 02110-1301, USA.
+
+Important:
+	This Licence file, the README.txt file, and LCS1113_Paper.pdf must 
+	remain intact in all derivative works produced by this work.
